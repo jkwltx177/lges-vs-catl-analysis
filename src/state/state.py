@@ -12,8 +12,7 @@ Data flow:
 """
 
 import operator
-from typing import Annotated, Dict, List, Optional
-from typing_extensions import TypedDict
+from typing import Annotated, Dict, List, Optional, TypedDict
 
 
 # ================================================================
@@ -99,8 +98,8 @@ class ResearchGraphState(TypedDict, total=False):
     query_set: List[str]
     search_plan: List[str]
 
-    # Retrieval 출력
-    raw_documents: List[Dict]
+    # Retrieval 출력 (병렬 노드가 동시에 쓰므로 operator.add로 누적)
+    raw_documents: Annotated[List[Dict], operator.add]
     grouped_documents: Dict[str, List[Dict]]   # query_id → 문서 목록
 
     # Evidence Validation 출력
@@ -129,6 +128,13 @@ class ResearchGraphState(TypedDict, total=False):
     swot_candidate_ids: List[str]
     unresolved_gaps: List[str]
 
+    # Query Coverage 필드
+    query_coverage: Dict[str, Dict]    # {"쿼리 텍스트": {"count": 5, "avg_distance": 0.21, ...}}
+
+    # Token / Cache 필드
+    token_usage: Dict[str, int]        # {"raw_documents": 45000, "total": 60000}
+    summary_cache: Dict[str, str]      # {"query_id_001": "요약 텍스트..."}
+
     # 제어 필드
     retry_count: int
     max_retry: int
@@ -145,6 +151,9 @@ class DataRefineGraphState(TypedDict, total=False):
     company_a: CompanyRaw
     company_b: CompanyRaw
     raw_findings: Annotated[List[ResearchFinding], operator.add]
+
+    # bridge_node_1에서 주입 (ResearchGraphState → DataRefineGraphState)
+    query_coverage: Dict[str, Dict]    # 쿼리별 커버리지 (Research 단계에서 계산)
 
     # clean_node 출력
     company_a_cleaned: List[RawItem]
