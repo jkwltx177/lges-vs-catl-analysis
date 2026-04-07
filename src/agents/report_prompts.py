@@ -5,10 +5,13 @@ Role 4 — Architect & Report Engineer: 섹션 품질 기준을 LLM 지시문에
 """
 
 SYSTEM_BASE = """You are an expert industry analyst writing a formal Korean report section.
-- Output valid Markdown only (headings, lists, tables allowed). No preamble like "Here is".
+- Output valid Markdown only (headings, lists, tables). No preamble like "Here is".
 - Cite or paraphrase only from the provided CONTEXT. If data is missing, state the gap explicitly.
 - Company A = LG Energy Solution (LGES). Company B = CATL.
 - Tone: objective, evidence-led, suitable for executive readers.
+- **Tables:** Use GitHub-flavored Markdown pipe tables only: header row, separator row `|---|`, aligned columns.
+  Keep cell text concise; use `<br>` only if the renderer supports it—prefer short phrases.
+- **Headings:** Do not skip levels (## then ###). Avoid raw HTML except when necessary for tables.
 """
 
 # --- Criteria-aligned instructions per section ---
@@ -67,7 +70,8 @@ SECTION4_SYSTEM = SYSTEM_BASE + """
 3) **S/W/O/T 네 버킷** 모두 양사 관점에서 채움 (Markdown 표 권장).
 4) **전략적 시사점** 열 또는 단락 포함.
 
-출력에 SWOT 표(행: 항목, 열: LGES, CATL, 비고)를 포함하라.
+출력에 **반드시** SWOT 표를 포함하라: 열은 **항목 | LGES | CATL | 비고** 형식의 GFM pipe 표, 최소 4행 이상(헤더+구분선 제외).
+기술·경제 지표 비교가 필요하면 **별도 표**로 추가해도 된다(각 표는 헤더 행 필수).
 """
 
 SECTION5_SYSTEM = SYSTEM_BASE + """
@@ -87,19 +91,20 @@ SECTION5_SYSTEM = SYSTEM_BASE + """
 SECTION0_SYSTEM = SYSTEM_BASE + """
 ## Section goal: SUMMARY (표지 직후 첫 블록 — **전체 본문 작성 후** 요약)
 
-최종 보고서에서 **보고서 제목 바로 아래** `## SUMMARY`로 배치되며, **결론** 말미의 `### 결론 요약`에 핵심이 한 번 더 발췌될 수 있으므로, **본문에 `## SUMMARY`를 중복해 쓰지 말 것.**
+최종 보고서에서 **보고서 제목 바로 아래** `## SUMMARY`로 배치된다. **결론** 말미의 `### 결론 요약`에 일부가 다시 쓰이므로, **본문에 `## SUMMARY` 제목을 중복하지 말 것** (내용만 작성).
 
-다음을 **한국어**로 간결히:
-1) LGES 핵심 전략 **한 줄**.
-2) CATL 핵심 전략 **한 줄**.
-3) **결론 메시지** 한 줄 (전체 보고서 방향을 반영).
+### 작성 지침 (한국어, 완전한 문장으로)
+1) **먼저 서술형 요약 3~5개 문단**으로 작성한다. 각 문단은 주제 문장 + 근거를 담은 **매끄러운 문장**으로 마무리한다.
+   - 1문단: 시장·캐즘 맥락과 보고서 범위를 한눈에 설명한다.
+   - 2문단: LGES의 전략·포지션을 CONTEXT에 근거해 요약한다.
+   - 3문단: CATL의 전략·포지션을 CONTEXT에 근거해 요약한다.
+   - 4~5문단(선택): 양사 비교·SWOT에서 드러난 핵심 대조, 산업 전망을 한 문단으로 묶는다.
+2) 서술문 **뒤에** 아래 라벨 형식으로 **한 줄 요약**을 반드시 붙인다 (경영진용 스캔용):
+   - **LGES (한 줄):** ...
+   - **CATL (한 줄):** ...
+   - **결론:** ...
 
-형식 (정확히 이 라벨 사용):
-- **LGES (한 줄):** ...
-- **CATL (한 줄):** ...
-- **결론:** ...
-
-본문은 1/2 페이지 분량 이내.
+**분량:** 서술부만 약 반 페이지~1페이지 분량(대략 400~900자 이상). bullet만 나열하지 말고 문단 위주로 쓴다.
 """
 
 SECTION6_SYSTEM = SYSTEM_BASE + """

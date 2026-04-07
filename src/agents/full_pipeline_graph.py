@@ -1,13 +1,19 @@
-"""Top-level orchestration for Research -> Refine -> Analysis."""
+"""Top-level orchestration for Research -> Refine -> Analysis -> (optional) Report."""
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict
 
 from ..nodes.bridge_nodes import bridge_node_1, bridge_node_2
 
 
-def run_research_refine_analysis(initial_state: Dict[str, Any], thread_prefix: str = "e2e") -> Dict[str, Any]:
+def run_research_refine_analysis(
+    initial_state: Dict[str, Any],
+    thread_prefix: str = "e2e",
+    *,
+    verbose: bool = False,
+) -> Dict[str, Any]:
     """Run the three role graphs sequentially with explicit bridge transfers."""
     from .data_refine_graph import graph as refine_graph
     from .research_graph import graph as research_graph
@@ -17,23 +23,53 @@ def run_research_refine_analysis(initial_state: Dict[str, Any], thread_prefix: s
     refine_config = {"configurable": {"thread_id": f"{thread_prefix}_refine"}}
     analysis_config = {"configurable": {"thread_id": f"{thread_prefix}_analysis"}}
 
+    if verbose:
+        print("[pipeline] (1/3) Research 그래프 실행 중…", flush=True)
     research_graph.invoke(initial_state, config=research_config)
     research_state = research_graph.get_state(research_config).values
     refine_input = bridge_node_1(research_state)
 
+    if verbose:
+        print("[pipeline] (2/3) Refine(자료 정리) 그래프 실행 중…", flush=True)
     refine_graph.invoke(refine_input, config=refine_config)
     refine_state = refine_graph.get_state(refine_config).values
     analysis_input = bridge_node_2(refine_state)
 
+    if verbose:
+        print("[pipeline] (3/3) Analysis 그래프 실행 중…", flush=True)
     analysis_graph = get_compiled_analysis_graph()
     return analysis_graph.invoke(analysis_input, config=analysis_config)
 
 
-def run_full_pipeline_with_report(initial_state: Dict[str, Any], thread_prefix: str = "e2e") -> Dict[str, Any]:
+def run_full_pipeline_with_report(
+    initial_state: Dict[str, Any],
+    thread_prefix: str = "e2e",
+    *,
+    verbose: bool = False,
+) -> Dict[str, Any]:
     """Research → Refine → Analysis → Report(섹션·merge·MD/PDF)."""
-    from src.core.report_workflow import run_report_from_report_state
-    from src.nodes.report.bridge import bridge_from_analysis
+    from src.core.report_workflow import run_report_from_analysis
 
-    analysis = run_research_refine_analysis(initial_state, thread_prefix=thread_prefix)
-    report_input = bridge_from_analysis(analysis)
-    return run_report_from_report_state(report_input)
+    analysis = run_research_refine_analysis(
+        initial_state, thread_prefix=thread_prefix, verbose=verbose
+    )
+    if verbose:
+        print("[pipeline] (4/4) Report 그래프 실행 중…", flush=True)
+    return run_report_from_analysis(analysis)
+
+
+def check_openai_config() -> tuple[bool, str]:
+    """Research~Report 전 구간에서 사용하는 OPENAI_API_KEY (.env)."""
+    import src.core.env  # noqa: F401
+
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not key:
+        return False, (
+            "OPENAI_API_KEY가 설정되어 있지 않습니다.\n"
+            "  프로젝트 루트에 `.env` 파일을 두고 다음 형식으로 넣어 주세요:\n"
+            "  OPENAI_API_KEY=sk-...\n"
+            "  (또는 셸에서 export OPENAI_API_KEY=... )\n"
+        )
+    if key.startswith("your_"):
+        return False, "OPENAI_API_KEY가 placeholder(`your_...`)입니다. 실제 키로 바꿔 주세요.\n"
+    return True, ""

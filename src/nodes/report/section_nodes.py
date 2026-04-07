@@ -3,14 +3,29 @@
 from __future__ import annotations
 
 import concurrent.futures
+import re
 from typing import Dict, Tuple
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agents import report_prompts as P
-from src.core.llm import get_chat_model_or_stub
+from src.core.llm import get_chat_model
 from src.nodes.report.context import build_report_context
 from src.state.state import ReportGraphState
+
+def _sanitize_for_chat_api(text: str, *, max_chars: int = 100_000) -> str:
+    """OpenAI 요청 JSON 직렬화 실패(400 invalid JSON body) 방지: 제어 문자 제거·길이 상한."""
+    if not isinstance(text, str):
+        text = str(text)
+    text = text.encode("utf-8", errors="replace").decode("utf-8")
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    if len(text) > max_chars:
+        text = (
+            text[:max_chars]
+            + "\n\n[CONTEXT가 길어 일부만 전송했습니다. raw_findings는 merge/레퍼런스 단계에서 활용됩니다.]"
+        )
+    return text
+
 
 _SECTION_SPECS: Dict[str, Tuple[str, str, str]] = {
     "section1": (P.SECTION1_SYSTEM, "section1", "2. 시장 배경 및 산업 환경 변화"),
@@ -27,7 +42,9 @@ def _invoke_section(state: ReportGraphState, section_key: str) -> str:
     system, mode, title = _SECTION_SPECS[section_key]
     ctx = build_report_context(state, mode=mode)
     human = P.human_message_template(title, ctx)
-    llm = get_chat_model_or_stub()
+    system = _sanitize_for_chat_api(system, max_chars=50_000)
+    human = _sanitize_for_chat_api(human, max_chars=120_000)
+    llm = get_chat_model()
     msg = llm.invoke([SystemMessage(content=system), HumanMessage(content=human)])
     return getattr(msg, "content", str(msg))
 
