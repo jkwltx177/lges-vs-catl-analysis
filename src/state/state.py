@@ -169,29 +169,68 @@ class DataRefineGraphState(TypedDict, total=False):
 
 
 # ================================================================
-# Analysis Sub-States
+# ANALYSIS SUB-TYPES (Task 3 세부 타입)
+# ================================================================
+
+class SwotItem(TypedDict):
+    """개별 SWOT 항목 (기본 단위)."""
+    point: str              # SWOT 내용
+    evidence: str           # 근거/출처
+    source: str             # 출처 명시
+
+
+class EnrichedSwotItem(TypedDict, total=False):
+    """SWOT 항목 + 전략적 맥락 (Task 3에서 생성)."""
+    point: str
+    evidence: str
+    why_it_matters: str     # 왜 중요한가?
+    impact: str             # 전략적 영향도
+
+
+class ComparativePoint(TypedDict, total=False):
+    """LGES vs CATL 비교 분석 포인트."""
+    dimension: str                   # 비교 차원
+    lges_position: str              # LGES 포지셔닝
+    catl_position: str              # CATL 포지셔닝
+    relative_advantage: str         # "LGES_leads" | "CATL_leads" | "balanced"
+
+
+class ResilienceEvaluation(TypedDict, total=False):
+    """EV 캐즘기 회복탄력성 평가 (final_insight 내부에 nested)."""
+    total_score_lges: float         # 0-100
+    total_score_catl: float         # 0-100
+    winner: str                     # "LGES" | "CATL" | "Tie"
+    evaluation_summary: str         # 요약
+    evaluation_factors: List[str]   # 평가 요인
+
+
+# ================================================================
+# Analysis Sub-States (카테고리별 분석 결과)
 # ================================================================
 
 class CategoryAnalysisState(TypedDict, total=False):
-    lges_items: List[Dict]             # LGES 해당 카테고리 분석 항목
-    catl_items: List[Dict]             # CATL 해당 카테고리 분석 항목
-    comparative_points: List[Dict]     # 양사 간 상대적 우위·열위 비교
-    strategic_implications: List[str]  # 카테고리별 전략적 시사점
+    """단일 SWOT 카테고리 분석 상태 (S/W/O/T 별)."""
+    lges_items: List[EnrichedSwotItem]          # LGES 해당 카테고리 항목 (enriched)
+    catl_items: List[EnrichedSwotItem]          # CATL 해당 카테고리 항목 (enriched)
+    comparative_points: List[ComparativePoint]  # 양사 비교 분석 포인트
+    strategic_implications: List[str]           # 카테고리별 전략적 시사점
 
 
 class ComparativeSwotState(TypedDict, total=False):
-    S: Dict
-    W: Dict
-    O: Dict
-    T: Dict
-    consistency_flags: List[str]
+    """통합 SWOT 매트릭스 (S/W/O/T 모두 포함)."""
+    lges_matrix: Dict[str, List[EnrichedSwotItem]]   # {"S": [...], "W": [...], ...}
+    catl_matrix: Dict[str, List[EnrichedSwotItem]]
+    comparative_summary: str                        # 비교 요약
+    strategic_positioning: str                      # 전략적 포지셔닝
 
 
-class InsightState(TypedDict, total=False):
-    key_differences: List[str]      # 양사 핵심 차이점
-    resilience_evaluation: Dict     # EV 캐즘기 회복탄력성 평가
-    strategic_winner: str           # 전략적 우위 기업 판단
-    final_insights: List[str]       # 최종 전략적 시사점 목록
+class FinalInsight(TypedDict, total=False):
+    """최종 전략적 인사이트 (Task 3 최종 산출물)."""
+    resilience_evaluation: ResilienceEvaluation     # 회복탄력성 평가
+    key_differences: List[str]                      # LGES vs CATL 핵심 차이점
+    strategic_winner: str                           # 전략적 우위 기업
+    final_insights: List[str]                       # 최종 시사점 (4개)
+    validation_notes: Optional[List[str]]           # 검증 노트 (optional)
 
 
 # ================================================================
@@ -199,7 +238,19 @@ class InsightState(TypedDict, total=False):
 # ================================================================
 
 class AnalysisGraphState(TypedDict, total=False):
-    # bridge_node_2에서 주입 (DataRefineGraphState → AnalysisGraphState)
+    """Task 3 Analysis Phase의 그래프 상태.
+    
+    입력:
+      - bridge_node_2에서 주입 (DataRefineGraphState → AnalysisGraphState)
+      - company_a_swot, company_b_swot, market_context, portfolio, raw_findings
+    
+    출력 (6-field contract — dispatch_node에서 보장):
+      - swot_S, swot_W, swot_O, swot_T (CategoryAnalysisState)
+      - comparative_swot (ComparativeSwotState)
+      - final_insight (FinalInsight)
+    """
+    
+    # ===== 입력 필드 (bridge_node_2에서 주입) =====
     market_context: MarketContext
     company_a_portfolio: CompanyPortfolio
     company_b_portfolio: CompanyPortfolio
@@ -207,17 +258,21 @@ class AnalysisGraphState(TypedDict, total=False):
     company_b_swot: CompanySWOT
     raw_findings: Annotated[List[ResearchFinding], operator.add]
 
-    # 병렬 SWOT 분석 에이전트 출력 (교차 기록 금지)
-    swot_S: CategoryAnalysisState   # Strength 분석 에이전트 전용
-    swot_W: CategoryAnalysisState   # Weakness 분석 에이전트 전용
-    swot_O: CategoryAnalysisState   # Opportunity 분석 에이전트 전용
-    swot_T: CategoryAnalysisState   # Threat 분석 에이전트 전용
+    # ===== 병렬 SWOT 분석 노드 출력 (교차 기록 금지) =====
+    swot_S: CategoryAnalysisState   # Strength 분석
+    swot_W: CategoryAnalysisState   # Weakness 분석
+    swot_O: CategoryAnalysisState   # Opportunity 분석
+    swot_T: CategoryAnalysisState   # Threat 분석
 
-    # context_integration_node / insight_node 출력
-    comparative_swot: ComparativeSwotState
-    final_insight: InsightState
+    # ===== 순차 분석 노드 출력 =====
+    comparative_swot: ComparativeSwotState      # context_integration_node
+    final_insight: FinalInsight                 # insight_node, cross_validation_node
 
-    # 제어 필드
+    # ===== 내부 라우팅 필드 (최종 출력에 포함 안 됨) =====
+    review_status: str                          # "approved" | "review_required"
+    consistency_flags: List[str]                # 일관성 검증 플래그 (빈 리스트 = OK)
+
+    # ===== 제어 필드 =====
     retry_count: int
     max_retry: int
     human_review_flags: List[str]
@@ -242,7 +297,7 @@ class ReportGraphState(TypedDict, total=False):
     # bridge_node_3에서 주입 (AnalysisGraphState → ReportGraphState)
     market_context: MarketContext
     comparative_swot: ComparativeSwotState
-    final_insight: InsightState
+    final_insight: FinalInsight
     company_a_portfolio: CompanyPortfolio
     company_b_portfolio: CompanyPortfolio
     raw_findings: Annotated[List[ResearchFinding], operator.add]

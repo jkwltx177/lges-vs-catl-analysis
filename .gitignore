@@ -27,6 +27,7 @@ wheels/
 # Environments
 .env
 .venv
+.python-version
 env/
 venv/
 ENV/
