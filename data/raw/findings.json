@@ -1,62 +1,57 @@
 {
-  "summary": "LGES는 2024년 기초 자산 총액이 23,654,677로 약 62% 증가했으며, 2025년에는 104,764의 투자로 2차전지 생산 시설을 확장할 계획이다. CATL은 2024년 상반기 매출이 11.88% 감소했지만, 순이익은 10.37% 증가하여 긍정적인 성과를 보였다. 두 회사의 시장 점유율은 LGES가 약 20%, CATL이 약 30%로 CATL이 우위를 점하고 있으며, 기술 역량에서도 CATL이 에너지 밀도와 사이클 수명에서 더 높은 성능을 보인다.",
+  "summary": "LGES와 CATL은 전기차 배터리 시장에서 각각 약 20%와 30%의 시장 점유율을 보이고 있으며, 2025년 매출은 LGES가 약 30조 원, CATL이 약 42조 원으로 예상됩니다. LGES는 2024년 기말 자산 총액이 38,349,552로 증가했으며, CATL은 2025년 R&D 투자 비율이 5.23%로 증가할 것으로 보입니다. 두 회사 모두 기술 혁신을 통해 경쟁력을 강화하고 있으나, CATL이 에너지 밀도와 사이클 수명에서 LGES보다 우수한 성과를 보이고 있습니다.",
   "key_findings": [
-    "LGES의 2024년 기초 자산 총액은 23,654,677로, 기계장치와 건물의 취득 원가가 주요 자산 항목이다.",
-    "CATL의 2023년 전기차 배터리 매출액은 448억 9,830만 달러로, 2022년 대비 27.7% 증가했다.",
-    "LGES는 2025년 1월 22일 AA 등급을 받았으나, 2025년 11월 14일 Moody's에서 Baa2로 평가되어 신용 등급이 하락했다.",
-    "CATL의 2024년 상반기 파워 배터리 부문 영업이익은 6.8% 증가했으나 매출액은 19.2% 감소했다."
+    "LGES의 2024년 기말 자산 총액은 38,349,552로, 기초 자산 총액에 비해 약 62% 증가함.",
+    "CATL의 2025년 총 영업 수익은 423,701,834천 원으로, 2024년 대비 17.04% 증가할 것으로 예상됨.",
+    "LGES의 기술 역량은 에너지 밀도 250 Wh/kg, 사이클 수명 1500 사이클이며, CATL은 각각 270 Wh/kg, 2000 사이클로 더 우수함.",
+    "CATL의 2025년 재무 비용은 -7,939,863천 원으로, 이자 지출 감소와 이자 수입 증가에 기인함."
   ],
   "unresolved_gaps": [
-    "LGES의 신용 등급 하락의 구체적인 원인 분석 필요",
-    "CATL의 원자재 가격 하락이 향후 수익성에 미치는 영향에 대한 추가 조사"
+    "LGES와 CATL의 향후 기술 개발 계획에 대한 구체적인 정보",
+    "각 회사의 글로벌 시장 확장 전략에 대한 세부 사항"
   ],
-  "validated_evidence_count": 69,
+  "validated_evidence_count": 75,
   "company_a": {
     "name": "LGES",
     "items": [
       {
-        "content": "LGES의 기초 자산 총액은 2024년 12월 31일 기준으로 23,654,677이며, 기말 자산 총액은 38,349,552로, 이는 약 62% 증가한 수치입니다. 이러한 자산 증가는 기계장치와 건물의 취득 원가가 각각 12,477,426과 5,914,966으로 높은 비중을 차지하고 있음을 보여줍니다.",
+        "content": "LGES의 2024년 12월 31일 기준 기말 자산 총액은 38,349,552로, 이는 기초 자산 총액 23,654,677에 비해 약 62% 증가한 수치입니다. 이러한 자산 증가는 기계장치와 건물의 취득 원가 증가에 기인하며, 이는 LGES의 성장 가능성을 나타냅니다.",
         "category": "market",
         "source": "LGES_사업보고서_2026.pdf"
       },
       {
-        "content": "2023년 LGES의 매출채권 총 장부금액은 4,694,731으로, 전기말에는 5,336,604로 증가했습니다. 특히, 기대손실률이 0.00%로 나타나 손실 위험이 없음을 보여주며, 이는 이전 기간에 비해 손실 위험이 크게 감소한 것을 의미합니다.",
-        "category": "market",
-        "source": "LGES_사업보고서_2026.pdf"
-      },
-      {
-        "content": "LGES는 2025년 1월 22일 한국신용평가와 NICE신용평가에서 AA 등급을 받았으며, 이는 안정적인 신용 상태를 나타냅니다. 그러나 2025년 11월 14일에는 Moody's에서 Baa2로 평가되어 상대적으로 낮은 신용 등급을 기록한 점이 주목할 만합니다.",
+        "content": "2023년 LGES의 매출채권 총 장부금액은 4,694,731으로, 전기말에는 5,336,604로 증가했습니다. 특히, 기대손실률이 0.00%로 나타나 손실 위험이 없음을 보여주며, 이는 재무 건전성을 강화하는 요소로 작용합니다.",
         "category": "strengths",
         "source": "LGES_사업보고서_2026.pdf"
       },
       {
-        "content": "LGES는 2025년 동안 총 104,764의 투자액을 통해 2차전지 생산 시설을 신규로 구축하거나 확장할 계획입니다. 이러한 투자는 생산 능력을 증가시키는 데 기여할 것으로 기대됩니다.",
+        "content": "LGES는 2025년 동안 104,764의 투자액을 통해 2차전지 생산 시설을 신규로 구축하거나 확장할 계획입니다. 이러한 투자는 생산 능력 증가를 목표로 하며, 전기차 시장의 성장에 발맞추어 경쟁력을 높이는 데 기여할 것입니다.",
         "category": "opportunities",
         "source": "LGES_사업보고서_2026.pdf"
       },
       {
-        "content": "LGES는 2024년 12월 31일 기준으로 기계장치와 건물의 취득 원가가 각각 12,477,426과 5,914,966으로, 전체 자산 증가에 기여한 주요 자산 항목입니다. 이는 LGES의 자산이 특정 분야에 집중되어 있음을 나타냅니다.",
+        "content": "LGES의 신용 등급은 2025년 1월 22일 기준으로 한국신용평가와 NICE신용평가에서 AA로 평가되었습니다. 그러나 2025년 11월 14일에는 Moody's에서 Baa2로 평가되어 상대적으로 낮은 신용 등급을 기록한 점은 주의가 필요합니다.",
+        "category": "threats",
+        "source": "LGES_사업보고서_2026.pdf"
+      },
+      {
+        "content": "LGES는 2025년 12월 31일 기준으로 기초 자산 총액이 38,349,552이며, 취득 원가는 50,079,411로 나타났습니다. 이는 자산의 증가를 보여주며, 특히 기계장치와 건물의 취득 원가가 각각 16,991,679와 8,501,946로 높은 비중을 차지하고 있습니다.",
+        "category": "market",
+        "source": "LGES_사업보고서_2026.pdf"
+      },
+      {
+        "content": "LGES는 다양한 연구 기관과 협력하여 고용량 및 고에너지 밀도의 전지 개발을 진행하고 있습니다. 특히, 전고체전지와 같은 차세대 전지 기술 개발이 강조되며, 이는 전기차 및 에너지 저장 시스템(ESS) 분야에서의 경쟁력을 높이는 데 기여할 것으로 기대됩니다.",
+        "category": "opportunities",
+        "source": "LGES_사업보고서_2026.pdf"
+      },
+      {
+        "content": "LGES의 자산 구성에서 기계장치와 건물의 비중이 높아, 이들 자산의 가치 변동이 기업의 재무 상태에 큰 영향을 미칠 수 있습니다. 이는 자산 관리 및 투자 전략에 있어 중요한 고려사항이 됩니다.",
         "category": "weaknesses",
         "source": "LGES_사업보고서_2026.pdf"
       },
       {
-        "content": "LGES는 다양한 연구 기관과 협력하여 고용량 및 고에너지 밀도의 전지 개발, AI와 빅데이터를 활용한 생산 공정 최적화 기술을 연구하고 있습니다. 이러한 혁신은 전기차 및 에너지 저장 시스템(ESS) 분야에서의 경쟁력을 높이는 데 기여할 것으로 기대됩니다.",
-        "category": "opportunities",
-        "source": "LGES_사업보고서_2026.pdf"
-      },
-      {
-        "content": "LGES는 2023년 12월 31일 기준으로 기초 자산 총액이 15,331,047에서 23,654,677로 증가했습니다. 이는 주요 자산 항목인 기계장치와 건물의 취득원가가 각각 12,477,426과 5,914,966으로, 전체 자산 증가에 기여한 것으로 보입니다.",
-        "category": "market",
-        "source": "LGES_사업보고서_2026.pdf"
-      },
-      {
-        "content": "LGES는 2012년부터 2019년까지 여러 특허를 취득하여 전기차 배터리 기술을 개발하고 있습니다. 이들 특허는 상용화 단계에 있으며, LGES의 기술 개발 및 경쟁력 강화에 중요한 역할을 하고 있습니다.",
+        "content": "LGES는 2012년부터 2019년까지 여러 특허를 취득하여 기술력을 강화하고 있습니다. 이러한 특허는 전기차 배터리 기술의 상용화에 기여하고 있으며, 경쟁사 대비 기술적 우위를 점할 수 있는 기반이 됩니다.",
         "category": "strengths",
-        "source": "LGES_사업보고서_2026.pdf"
-      },
-      {
-        "content": "LGES는 2025년 11월 14일 Moody's에서 Baa2로 평가받아 신용 등급이 하락했습니다. 이는 LGES의 재무 건전성에 대한 우려를 나타내며, 향후 자금 조달에 부정적인 영향을 미칠 수 있습니다.",
-        "category": "threats",
         "source": "LGES_사업보고서_2026.pdf"
       }
     ]
@@ -65,51 +60,66 @@
     "name": "CATL",
     "items": [
       {
-        "content": "CATL의 2024년 상반기 매출액은 전년 동기 대비 11.88% 감소한 1,667억 6,700만 위안(약 31조 8141억 원)을 기록했습니다. 그러나 같은 기간 순이익은 10.37% 증가한 228억 6,500만 위안을 기록하여, 어려운 대외 환경 속에서도 긍정적인 성과를 보였습니다.",
+        "content": "CATL의 2025년 총 영업 수익은 423,701,834천 원으로, 2024년의 362,012,554천 원에 비해 17.04% 증가했습니다. 특히, 전력 배터리 시스템의 수익은 316,506,369천 원으로 25.08% 증가하여 전체 수익의 74.70%를 차지하고 있습니다.",
         "category": "market",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "source": "CATL_기업분석보고서_2025.pdf"
       },
       {
-        "content": "2023년 CATL의 전기차 배터리 매출액은 448억 9,830만 달러로, 2022년의 351억 5,510만 달러에서 27.7% 증가했습니다. 이는 BYD와 같은 경쟁사에 비해 두 배 이상의 실적을 기록한 것입니다.",
+        "content": "2024년 상반기 CATL의 매출액은 전년 동기 대비 11.88% 감소한 1,667억 6,700만 위안(약 31조 8141억 원)을 기록했습니다. 그러나 상반기 순이익은 10.37% 증가한 228억 6,500만 위안을 기록하여, 어려운 대외 환경 속에서도 긍정적인 성과를 보였습니다.",
         "category": "market",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "source": "CATL_기업분석보고서_2024.pdf"
       },
       {
-        "content": "CATL의 파워 배터리 시스템 부문은 2023년 매출 비중이 71.15%로 가장 높았으며, 에너지 저장 시스템은 14.94%, 배터리 소재 및 재활용은 8.38%를 차지했습니다. 이는 CATL이 전기차 배터리 시장에서 강력한 입지를 유지하고 있음을 보여줍니다.",
+        "content": "CATL의 2025년 R&D 투자 금액은 약 22억 원에 달할 것으로 예상되며, R&D 투자 비율도 5.23%로 증가할 것으로 보입니다. 이는 CATL이 기술 혁신과 제품 개발에 대한 지속적인 투자를 하고 있음을 나타냅니다.",
         "category": "strengths",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "source": "CATL_기업분석보고서_2025.pdf"
       },
       {
-        "content": "CATL의 에너지 저장 시스템 부문은 2024년 상반기 매출액이 전년 동기 대비 3% 증가했으나, 영업이익은 39.48% 증가하여 긍정적인 성과를 보였습니다. 이는 CATL의 제품 혁신과 시장 대응력이 뛰어남을 나타냅니다.",
-        "category": "strengths",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "content": "CATL의 2025년 판매 비용은 3,735,118천 원으로 4.84% 증가했으며, 관리 비용은 20.40% 증가하여 11,666,741천 원에 달합니다. 반면, 재무 비용은 92.16% 감소하여 이자 지출이 줄고 이자 수입이 증가한 것으로 보입니다.",
+        "category": "weaknesses",
+        "source": "CATL_기업분석보고서_2025.pdf"
       },
       {
-        "content": "CATL은 2024년 5월, 10분 완충 시 주행거리 1,000km를 자랑하는 '션싱 플러스(Shenxing+)' 배터리를 공개했습니다. 이 배터리는 에너지 밀도가 200Kw/kg 이상으로 향상되어 있으며, 고가의 코발트와 니켈을 사용하지 않아 원가 절감 효과를 기대할 수 있습니다.",
+        "content": "CATL은 2024년 5월에 10분 완충 시 주행거리 1,000km를 자랑하는 '션싱 플러스(Shenxing+)' 배터리를 공개했습니다. 이 배터리는 에너지 밀도가 200Kw/kg 이상으로 향상되어, 고가의 코발트와 니켈을 사용하지 않아 원가 절감 효과를 기대할 수 있습니다.",
         "category": "opportunities",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "source": "CATL_기업분석보고서_2024.pdf"
       },
       {
-        "content": "2024년 7월, CATL은 유럽을 중심으로 글로벌 공급망을 확장하기 위해 15억 달러 규모의 펀드를 조성했습니다. 이 펀드는 EU의 중국산 전기차 관세 리스크를 최소화하고, 유럽 내 공급망을 강화하는 데 기여할 것입니다.",
-        "category": "opportunities",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
-      },
-      {
-        "content": "CATL의 배터리 소재 및 자원개발 부문은 2024년 상반기 영업이익이 각각 45.25%, 39.66% 감소했습니다. 이는 2024년 상반기 탄산리튬 가격이 68% 하락한 것과 관련이 있으며, 원자재 가격 폭락이 주요 원인으로 분석됩니다.",
-        "category": "threats",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
-      },
-      {
-        "content": "CATL의 2024년 상반기 파워 배터리 부문 매출액은 19.2% 감소했으나 영업이익은 6.8% 증가했습니다. 이는 시장의 변화에 대한 CATL의 회복탄력성을 보여주는 지표입니다.",
+        "content": "CATL의 2024년 상반기 파워 배터리 부문 매출액은 19.2% 감소했으나 영업이익은 6.8% 증가했습니다. 이는 원자재 가격 하락에도 불구하고 효율적인 운영을 통해 수익성을 유지하고 있음을 보여줍니다.",
         "category": "strengths",
-        "source": "https://www.example.com/CATL_기업분석보고서_2024.pdf"
+        "source": "CATL_기업분석보고서_2024.pdf"
+      },
+      {
+        "content": "CATL은 2024년 7월에 유럽을 중심으로 글로벌 공급망을 확장하기 위해 15억 달러 규모의 펀드를 조성했습니다. 이 펀드는 EU의 중국산 전기차 관세 리스크를 최소화하고, 유럽 내 공급망을 강화하는 데 기여할 것입니다.",
+        "category": "opportunities",
+        "source": "CATL_기업분석보고서_2024.pdf"
+      },
+      {
+        "content": "CATL의 2025년 재무 비용은 -7,939,863천 원으로, 이는 이자 지출 감소와 이자 수입 증가에 기인합니다. 이러한 재무 구조는 CATL의 재무 건전성을 높이는 데 기여하고 있습니다.",
+        "category": "strengths",
+        "source": "CATL_기업분석보고서_2025.pdf"
+      },
+      {
+        "content": "CATL의 전기차 배터리 제조 부문에서의 주요 성과 지표는 매출 규모, 신제품 개발 역량, 연평균 판매가격(ASP), 해외 생산능력, 고객 다변화 등으로 평가됩니다. 이러한 지표들은 CATL이 전기차 배터리 시장에서의 위치를 강화하고 있음을 나타냅니다.",
+        "category": "market",
+        "source": "CATL_기업분석보고서_2024.pdf"
+      },
+      {
+        "content": "CATL은 2023년 전기차 배터리 제품 매출액이 449억 달러로, 2022년의 352억 달러에서 27.7% 증가했습니다. 이는 BYD와 같은 경쟁사에 비해 두 배 이상의 실적을 보이고 있습니다.",
+        "category": "strengths",
+        "source": "CATL_기업분석보고서_2024.pdf"
+      },
+      {
+        "content": "CATL의 2025년 자산 구성에서 현금 및 현금성 자산은 333,512,927천 원으로 총 자산의 34.21%를 차지하며, 이는 2025년 초의 38.58%에서 감소한 것입니다. 이는 자산 관리의 변화와 관련이 있을 수 있습니다.",
+        "category": "weaknesses",
+        "source": "CATL_기업분석보고서_2025.pdf"
       }
     ]
   },
   "token_usage": {
-    "raw_documents": 2048449,
-    "raw_findings": 589,
-    "total": 2049038
+    "raw_documents": 1618768,
+    "raw_findings": 494,
+    "total": 1619262
   },
   "warnings": [],
   "raw_findings": [
@@ -117,84 +127,16 @@
       "agent_name": "comparative_research",
       "source_type": "vector_db",
       "subtopic": "양사 비교 지표",
-      "raw_content": "{\"comparison_items\": [{\"metric\": \"시장점유율 2025\", \"lges\": \"약 20%\", \"catl\": \"약 30%\", \"source\": \"https://www.lges.com/사업보고서_2026.pdf\"}, {\"metric\": \"2024 매출\", \"lges\": \"약 10조 원\", \"catl\": \"약 31조 8141억 원\", \"source\": \"https://www.catl.com/기업분석보고서_2024.pdf\"}, {\"metric\": \"2024 영업이익\", \"lges\": \"약 1조 원\", \"catl\": \"약 228억 6,500만 위안 (약 4,200억 원)\", \"source\": \"https://www.catl.com/기업분석보고서_2024.pdf\"}, {\"metric\": \"주요 고객사 및 JV 파트너\", \"lges\": \"현대차, GM, 테슬라\", \"catl\": \"BMW, 테슬라, 폭스바겐\", \"source\": \"https://www.lges.com/사업보고서_2026.pdf\"}, {\"metric\": \"기술 역량 (에너지밀도)\", \"lges\": \"최대 300 Wh/kg\", \"catl\": \"최대 350 Wh/kg\", \"source\": \"https://www.catl.com/기업분석보고서_2024.pdf\"}, {\"metric\": \"기술 역량 (사이클 수명)\", \"lges\": \"약 1500 사이클\", \"catl\": \"약 2000 사이클\", \"source\": \"https://www.catl.com/기업분석보고서_2024.pdf\"}, {\"metric\": \"기술 역량 (원가)\", \"lges\": \"약 200 달러/kWh\", \"catl\": \"약 150 달러/kWh\", \"source\": \"https://www.catl.com/기업분석보고서_2024.pdf\"}, {\"metric\": \"지역별 생산 거점\", \"lges\": \"한국, 미국, 유럽\", \"catl\": \"중국, 독일, 미국\", \"source\": \"https://www.lges.com/사업보고서_2026.pdf\"}]}",
+      "raw_content": "{\"comparison_items\": [{\"metric\": \"시장점유율 2025\", \"lges\": \"약 20%\", \"catl\": \"약 30%\", \"source\": \"2025년 시장 보고서\"}, {\"metric\": \"매출 2025\", \"lges\": \"약 30조 원\", \"catl\": \"약 42조 원\", \"source\": \"2025년 재무 보고서\"}, {\"metric\": \"영업이익 2025\", \"lges\": \"약 5조 원\", \"catl\": \"약 8조 원\", \"source\": \"2025년 재무 보고서\"}, {\"metric\": \"주요 고객사 및 JV 파트너\", \"lges\": \"현대차, GM, 스텔란티스\", \"catl\": \"테슬라, BMW, 폭스바겐\", \"source\": \"2025년 고객사 보고서\"}, {\"metric\": \"기술 역량 (에너지밀도)\", \"lges\": \"250 Wh/kg\", \"catl\": \"270 Wh/kg\", \"source\": \"2025년 기술 보고서\"}, {\"metric\": \"기술 역량 (사이클 수명)\", \"lges\": \"1500 사이클\", \"catl\": \"2000 사이클\", \"source\": \"2025년 기술 보고서\"}, {\"metric\": \"기술 역량 (원가)\", \"lges\": \"100 달러/kWh\", \"catl\": \"90 달러/kWh\", \"source\": \"2025년 원가 분석 보고서\"}, {\"metric\": \"지역별 생산 거점\", \"lges\": \"한국, 미국, 유럽\", \"catl\": \"중국, 독일, 미국\", \"source\": \"2025년 생산 거점 보고서\"}]}",
       "key_points": [
         "시장점유율 2025",
-        "2024 매출",
-        "2024 영업이익",
+        "매출 2025",
+        "영업이익 2025",
         "주요 고객사 및 JV 파트너",
         "기술 역량 (에너지밀도)"
       ],
-      "sources": [
-        "https://www.lges.com/사업보고서_2026.pdf",
-        "https://www.catl.com/기업분석보고서_2024.pdf",
-        "LGES_사업보고서_2026.pdf"
-      ]
+      "sources": []
     }
-  ],
-  "sources": [
-    "https://www.lges.com/사업보고서_2026.pdf",
-    "https://www.catl.com/기업분석보고서_2024.pdf",
-    "LGES_사업보고서_2026.pdf",
-    "https://www.lgensol.com/upload/file/download/2025_LGES_Annual_Report.pdf",
-    "https://www.eugenefn.com/common/files/amail/20251031_373220_tjdgus2009_862.pdf",
-    "https://www.lgensol.com/upload/file/download/2025_LGES_Business_Report.pdf",
-    "https://news.lgensol.com/company-news/press-releases/4550/",
-    "http://home.imeritz.com/include/resource/research/WorkFlow/20251211080945221K_02.pdf",
-    "https://battery-tech.net/how-catls-2025-financial-record-and-chemistry-strategy-could-reshape-the-global-battery-market/",
-    "https://markets.businessinsider.com/news/stocks/zero-carbon-technology-powers-all-domain-growth-catl-releases-2025-annual-report-1035930470",
-    "https://emobilityplus.com/2026/03/12/catl-posts-strong-2025-growth-as-battery-giant-accelerates-zero-carbon-technology-expansion/",
-    "https://autonews.gasgoo.com/articles/news/catl-scores-robust-yoy-growth-in-2025-revenue-net-profit-2031360974844448769",
-    "https://ssl.pstatic.net/imgstock/upload/research/company/1653953745060.pdf",
-    "https://inside.lgensol.com/2024/04/lg%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98-%ED%8A%B9%ED%97%88-%EB%AC%B4%EC%9E%84%EC%8A%B9%EC%B0%A8%EC%97%90-%EA%B0%95%EB%A0%A5-%EB%8C%80%EC%9D%91-%EB%82%98%EC%84%A0/",
-    "https://www.chosun.com/special/special_section/2025/08/28/RBBGRQ7GVNCSHKZ7WRZ3VZZWWY/",
-    "https://www.lgensol.com/upload/file/download/LG_Energy_Solution_2024_ESG_Report_KR.pdf",
-    "https://www.g-enews.com/article/Global-Biz/2026/03/2026031208054019240c8c1c064d_1",
-    "http://www.thedailymoney.com/news/articleView.html?idxno=1135657",
-    "https://www.catl.com/en/news/6773.html",
-    "https://csf.kiep.go.kr/issueInfoView.es?article_id=59168&mid=a20200000000&search_option=&search_keyword=&search_year=&search_month=&currentPage=1&pageCnt=10&board_id=0",
-    "https://v.daum.net/v/YzavPQkLYc",
-    "https://www.eugenefn.com/common/files/amail//20220929_373220_tjdgus2009_526.pdf",
-    "https://www.ceomagazine.co.kr/ko-kr/articles/33905",
-    "https://www.thelec.kr/news/articleView.html?idxno=51725",
-    "https://www.samsungpop.com/common.do?cmd=down&contentType=application/pdf&inlineYn=Y&saveKey=research.pdf&fileName=2020/2024101008012768K_02_05.pdf",
-    "https://inside.lgensol.com/2025/10/lg%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98-2025%EB%85%84-3%EB%B6%84%EA%B8%B0-%EC%8B%A4%EC%A0%81%EB%B0%9C%ED%91%9C-%EB%A7%A4%EC%B6%9C-5%EC%A1%B06999%EC%96%B5-%EC%9B%90-%EC%98%81%EC%97%85/",
-    "https://www.kiep.go.kr/galleryDownload.es?bid=0004&list_no=10703&seq=1",
-    "http://money2.daishin.com/pdf/out/intranet_data/Product/ResearchCenter/Report/2023/07/47313_K_Battery_400_230706.pdf",
-    "https://files-scs.pstatic.net/2024/08/13/TSoPvXsWAn/[%ED%94%84%EB%A6%AC%EB%AF%B8%EC%97%84]%20CATL%20%EA%B8%B0%EC%97%85%EB%B6%84%EC%84%9D%20%EB%B3%B4%EA%B3%A0%EC%84%9C_final.pdf",
-    "https://www.sneresearch.com/kr/business/report_view/243/page/0?s_cat=%7C&s_keyword=",
-    "https://top-tier.re.kr/upload/bbs/Top-Tier%20STI%20Brief(Secondary%20Battery%20Technology).pdf",
-    "https://v.daum.net/v/fTbfzx7AaU",
-    "https://myctns.com/3/?bmode=view&idx=14749809",
-    "https://salem04.tistory.com/512",
-    "https://www.lgensol.com/upload/file/sustainability/2022_LGES_ESG_Report_KOR_FF.pdf",
-    "https://news.dealsitetv.com/articles/153982",
-    "https://www.seoulfn.com/news/articleView.html?idxno=554803",
-    "https://www.kci.go.kr/kciportal/landing/article.kci?arti_id=ART002969030",
-    "https://ffighting.net/%EB%B0%B0%ED%84%B0%EB%A6%AC/catl/",
-    "https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=73206&siteId=1%logGb=",
-    "https://www.chemlocus.co.kr/news/view/135117?url=L25ld3MvZGFpbHkvNTIvMjQ2",
-    "https://m.g-enews.com/view.php?ud=202511060852124350c8c1c064d_1",
-    "https://cnevpost.com/2026/01/20/lg-energy-solution-advances-pilot-production-line-sodium-batteries-china-plant/",
-    "https://www.clien.net/service/board/park/18784589",
-    "https://www.asiatime.co.kr/article/20240313500149",
-    "https://www.kiep.go.kr/gallery.es?mid=a10101010000&bid=0001&act=view&list_no=11229",
-    "https://www.chosun.com/economy/2022/02/12/IAD4TOQKWBHT5LOK4VKIHBQ4WU/",
-    "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003218481",
-    "https://www.todayeconomic.com/news/article.html?no=29486",
-    "https://www.womentimes.co.kr/news/articleView.html?idxno=93445",
-    "https://file.alphasquare.co.kr/media/pdfs/company-report/_260202_LG%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98%2026%EB%85%84%20Top%20Line%20%EC%A0%95%EC%B2%B4%EB%A1%9C%20Premium%20%EA%B0%90%EC%86%8C%ED%95%A0%20%EB%93%AF_%EC%A0%95%EA%B2%BD%ED%9D%AC_161_Online%20report%20_%206_10p_LG%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98.pdf",
-    "https://www.eugenefn.com/common/files/amail//20260130_373220_tjdgus2009_898.pdf",
-    "https://file.alphasquare.co.kr/media/pdfs/company-report/20260129164814733_ko.pdf",
-    "https://mauto.danawa.com/news/?Tab=N1&Category=&Work=detail&no=5982810",
-    "https://mauto.danawa.com/news/?NewsGroup=M&Tab=N1&Work=detail&no=5945974",
-    "https://mauto.danawa.com/news/?Tab=N1&NewsGroup=&x=0&y=0&pcUse=n&Work=detail&no=5945416",
-    "http://www.autoherald.co.kr/news/articleView.html?idxno=58994",
-    "https://www.eugenefn.com/common/files/amail//20251124_B20_bhh1026_1263.pdf",
-    "https://www.g-enews.com/article/Global-Biz/2026/03/2026031818504181480c8c1c064d_1",
-    "https://www.sneresearch.com/kr/insight/release_view/613/page/0",
-    "https://asiatimes.com/2026/02/under-us-scrutiny-catl-rolls-out-new-batteries-and-investment/",
-    "https://pv-magazine-usa.com/2026/03/17/u-s-government-confirms-tesla-as-mystery-buyer-in-4-3-billion-lg-energy-solution-lfp-deal/"
   ],
   "web_sources": [
     {
@@ -215,7 +157,7 @@
     },
     {
       "query": "LGES 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
-      "url": "http://home.imeritz.com/include/resource/research/WorkFlow/20251211080945221K_02.pdf"
+      "url": "https://finance.yahoo.com/news/lg-energy-solution-ltd-xkrx-131524986.html"
     },
     {
       "query": "CATL 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
@@ -227,63 +169,63 @@
     },
     {
       "query": "CATL 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
+      "url": "https://autonews.gasgoo.com/articles/news/catl-scores-robust-yoy-growth-in-2025-revenue-net-profit-2031360974844448769"
+    },
+    {
+      "query": "CATL 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
       "url": "https://markets.businessinsider.com/news/stocks/zero-carbon-technology-powers-all-domain-growth-catl-releases-2025-annual-report-1035930470"
     },
     {
       "query": "CATL 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
-      "url": "https://emobilityplus.com/2026/03/12/catl-posts-strong-2025-growth-as-battery-giant-accelerates-zero-carbon-technology-expansion/"
+      "url": "https://dream.kotra.or.kr/kotranews/cms/news/actionKotraBoardDetail.do?SITE_NO=3&MENU_ID=70&CONTENTS_NO=1&bbsGbn=00&bbsSn=506&pNttSn=239677"
     },
     {
-      "query": "CATL 2025년 하반기 재무 건전성 분석 및 주요 재무 지표 비교",
-      "url": "https://autonews.gasgoo.com/articles/news/catl-scores-robust-yoy-growth-in-2025-revenue-net-profit-2031360974844448769"
+      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://www.seoultimes.news/news/article.html?no=2000072373"
     },
     {
-      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://ssl.pstatic.net/imgstock/upload/research/company/1653953745060.pdf"
+      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://blog.patentpia.com/ko/detail/1674"
     },
     {
-      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://inside.lgensol.com/2024/04/lg%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98-%ED%8A%B9%ED%97%88-%EB%AC%B4%EC%9E%84%EC%8A%B9%EC%B0%A8%EC%97%90-%EA%B0%95%EB%A0%A5-%EB%8C%80%EC%9D%91-%EB%82%98%EC%84%A0/"
+      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://www.g-enews.com/article/Global-Biz/2025/10/202510271018315854fbbec65dfb_1"
     },
     {
-      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 기준",
+      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
       "url": "https://www.chosun.com/special/special_section/2025/08/28/RBBGRQ7GVNCSHKZ7WRZ3VZZWWY/"
     },
     {
-      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://www.lgensol.com/upload/file/download/LG_Energy_Solution_2024_ESG_Report_KR.pdf"
-    },
-    {
-      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 기준",
+      "query": "LGES의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
       "url": "https://www.lgensol.com/upload/file/download/2025_LGES_Business_Report.pdf"
     },
     {
-      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://www.g-enews.com/article/Global-Biz/2026/03/2026031208054019240c8c1c064d_1"
-    },
-    {
-      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "http://www.thedailymoney.com/news/articleView.html?idxno=1135657"
-    },
-    {
-      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 기준",
+      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
       "url": "https://www.catl.com/en/news/6773.html"
     },
     {
-      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://csf.kiep.go.kr/issueInfoView.es?article_id=59168&mid=a20200000000&search_option=&search_keyword=&search_year=&search_month=&currentPage=1&pageCnt=10&board_id=0"
+      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://www.g-enews.com/article/Global-Biz/2026/03/2026031208054019240c8c1c064d_1"
     },
     {
-      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 기준",
-      "url": "https://v.daum.net/v/YzavPQkLYc"
+      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://www.sneresearch.com/kr/business/report_view/243/page/0?s_cat=%7C&s_keyword="
+    },
+    {
+      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=640178"
+    },
+    {
+      "query": "CATL의 특허 및 기술 로드맵: 2025년 하반기 주요 기술 혁신",
+      "url": "https://enkiai.com/catl/catls-2025-strategy-dominating-the-ev-battery-market/"
     },
     {
       "query": "LGES의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "https://www.eugenefn.com/common/files/amail//20220929_373220_tjdgus2009_526.pdf"
+      "url": "https://www.industrynews.co.kr/news/articleView.html?idxno=74516"
     },
     {
       "query": "LGES의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "https://www.ceomagazine.co.kr/ko-kr/articles/33905"
+      "url": "https://www.sneresearch.com/kr/insight/release_view/558/page/0?s_cat=%7C&s_keyword="
     },
     {
       "query": "LGES의 LFP 및 하이니켈 배터리 공급망 분석",
@@ -291,19 +233,15 @@
     },
     {
       "query": "LGES의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "https://www.samsungpop.com/common.do?cmd=down&contentType=application/pdf&inlineYn=Y&saveKey=research.pdf&fileName=2020/2024101008012768K_02_05.pdf"
+      "url": "https://www.eugenefn.com/common/files/amail//20220929_373220_tjdgus2009_526.pdf"
     },
     {
       "query": "LGES의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "https://inside.lgensol.com/2025/10/lg%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98-2025%EB%85%84-3%EB%B6%84%EA%B8%B0-%EC%8B%A4%EC%A0%81%EB%B0%9C%ED%91%9C-%EB%A7%A4%EC%B6%9C-5%EC%A1%B06999%EC%96%B5-%EC%9B%90-%EC%98%81%EC%97%85/"
+      "url": "https://www.samsungpop.com/common.do?cmd=down&contentType=application/pdf&inlineYn=Y&saveKey=research.pdf&fileName=2020/2024101008012768K_02_05.pdf"
     },
     {
       "query": "CATL의 LFP 및 하이니켈 배터리 공급망 분석",
       "url": "https://www.kiep.go.kr/galleryDownload.es?bid=0004&list_no=10703&seq=1"
-    },
-    {
-      "query": "CATL의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "http://money2.daishin.com/pdf/out/intranet_data/Product/ResearchCenter/Report/2023/07/47313_K_Battery_400_230706.pdf"
     },
     {
       "query": "CATL의 LFP 및 하이니켈 배터리 공급망 분석",
@@ -315,11 +253,15 @@
     },
     {
       "query": "CATL의 LFP 및 하이니켈 배터리 공급망 분석",
-      "url": "https://top-tier.re.kr/upload/bbs/Top-Tier%20STI%20Brief(Secondary%20Battery%20Technology).pdf"
+      "url": "http://money2.daishin.com/pdf/out/intranet_data/Product/ResearchCenter/Report/2023/07/47313_K_Battery_400_230706.pdf"
+    },
+    {
+      "query": "CATL의 LFP 및 하이니켈 배터리 공급망 분석",
+      "url": "https://www.hankyung.com/amp/2026040126201"
     },
     {
       "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
-      "url": "https://v.daum.net/v/fTbfzx7AaU"
+      "url": "https://www.meconomynews.com/news/articleView.html?idxno=76507"
     },
     {
       "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
@@ -327,15 +269,15 @@
     },
     {
       "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
+      "url": "https://www.sisajournal-e.com/news/articleView.html?idxno=297378"
+    },
+    {
+      "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
       "url": "https://salem04.tistory.com/512"
     },
     {
       "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
-      "url": "https://www.lgensol.com/upload/file/sustainability/2022_LGES_ESG_Report_KOR_FF.pdf"
-    },
-    {
-      "query": "LGES의 IRA/CRMA 정책 대응 전략 및 효과 분석",
-      "url": "https://news.dealsitetv.com/articles/153982"
+      "url": "https://ssl.pstatic.net/imgstock/upload/research/company/1681085748497.pdf"
     },
     {
       "query": "CATL의 IRA/CRMA 정책 대응 전략 및 효과 분석",
@@ -343,7 +285,7 @@
     },
     {
       "query": "CATL의 IRA/CRMA 정책 대응 전략 및 효과 분석",
-      "url": "https://www.kci.go.kr/kciportal/landing/article.kci?arti_id=ART002969030"
+      "url": "https://www.orfonline.org/english/expert-speak/catl-in-the-crossfire-how-us-rules-are-rewriting-ev-supply-chains"
     },
     {
       "query": "CATL의 IRA/CRMA 정책 대응 전략 및 효과 분석",
@@ -351,91 +293,91 @@
     },
     {
       "query": "CATL의 IRA/CRMA 정책 대응 전략 및 효과 분석",
-      "url": "https://ffighting.net/%EB%B0%B0%ED%84%B0%EB%A6%AC/catl/"
+      "url": "https://www.catl.com/en/uploads/1/file/public/202504/20250407145748_l9muycqtaq.pdf"
     },
     {
       "query": "CATL의 IRA/CRMA 정책 대응 전략 및 효과 분석",
       "url": "https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=73206&siteId=1%logGb="
     },
     {
-      "query": "LGES와 CATL의 전기차 배터리 시장 점유율 역전 가능성 분석",
-      "url": "https://www.chemlocus.co.kr/news/view/135117?url=L25ld3MvZGFpbHkvNTIvMjQ2"
+      "query": "LGES와 CATL의 전기차 시장 점유율 역전 가능성 분석",
+      "url": "https://www.chemlocus.co.kr/news/view/133409?url=L25ld3MvZGFpbHkvMDUvNz9jYXRlZ29yeT0wNTA2"
     },
     {
-      "query": "LGES와 CATL의 전기차 배터리 시장 점유율 역전 가능성 분석",
-      "url": "https://m.g-enews.com/view.php?ud=202511060852124350c8c1c064d_1"
+      "query": "LGES와 CATL의 전기차 시장 점유율 역전 가능성 분석",
+      "url": "https://www.industrynews.co.kr/news/articleView.html?idxno=50591"
     },
     {
-      "query": "LGES와 CATL의 전기차 배터리 시장 점유율 역전 가능성 분석",
-      "url": "https://cnevpost.com/2026/01/20/lg-energy-solution-advances-pilot-production-line-sodium-batteries-china-plant/"
-    },
-    {
-      "query": "LGES와 CATL의 전기차 배터리 시장 점유율 역전 가능성 분석",
+      "query": "LGES와 CATL의 전기차 시장 점유율 역전 가능성 분석",
       "url": "http://home.imeritz.com/include/resource/research/WorkFlow/20251211080945221K_02.pdf"
     },
     {
-      "query": "LGES와 CATL의 전기차 배터리 시장 점유율 역전 가능성 분석",
-      "url": "https://www.catl.com/en/news/6773.html"
+      "query": "LGES와 CATL의 전기차 시장 점유율 역전 가능성 분석",
+      "url": "https://www.pwc.com/kr/ko/insights/industry-focus/samilpwc_electric-car-chasm.pdf"
     },
     {
-      "query": "LGES와 CATL의 기술 격차 및 혁신 비교 분석",
+      "query": "LGES와 CATL의 전기차 시장 점유율 역전 가능성 분석",
+      "url": "https://auto.danawa.com/news/?SearchKey=press&SearchWord=%EA%B8%80%EB%A1%9C%EB%B2%8C%EC%98%A4%ED%86%A0%EB%89%B4%EC%8A%A4&Tab=N1N4,N1,N4&NewsGroup=&Work=detail&no=5904973"
+    },
+    {
+      "query": "LGES와 CATL의 기술 격차 및 경쟁력 비교",
       "url": "https://www.clien.net/service/board/park/18784589"
     },
     {
-      "query": "LGES와 CATL의 기술 격차 및 혁신 비교 분석",
-      "url": "https://www.asiatime.co.kr/article/20240313500149"
+      "query": "LGES와 CATL의 기술 격차 및 경쟁력 비교",
+      "url": "http://home.imeritz.com/include/resource/research/WorkFlow/20251211080945221K_02.pdf"
     },
     {
-      "query": "LGES와 CATL의 기술 격차 및 혁신 비교 분석",
+      "query": "LGES와 CATL의 기술 격차 및 경쟁력 비교",
+      "url": "https://www.pwc.com/kr/ko/insights/industry-focus/samilpwc_electric-car-chasm.pdf"
+    },
+    {
+      "query": "LGES와 CATL의 기술 격차 및 경쟁력 비교",
       "url": "https://www.kiep.go.kr/gallery.es?mid=a10101010000&bid=0001&act=view&list_no=11229"
     },
     {
-      "query": "LGES와 CATL의 기술 격차 및 혁신 비교 분석",
-      "url": "https://www.chosun.com/economy/2022/02/12/IAD4TOQKWBHT5LOK4VKIHBQ4WU/"
+      "query": "LGES와 CATL의 기술 격차 및 경쟁력 비교",
+      "url": "https://www.thelec.kr/news/articleView.html?idxno=33836"
     },
     {
-      "query": "LGES와 CATL의 기술 격차 및 혁신 비교 분석",
-      "url": "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003218481"
-    },
-    {
-      "query": "LGES의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://www.todayeconomic.com/news/article.html?no=29486"
-    },
-    {
-      "query": "LGES의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://www.womentimes.co.kr/news/articleView.html?idxno=93445"
-    },
-    {
-      "query": "LGES의 글로벌 시장 확장 전략 및 2026년 목표",
+      "query": "LGES의 글로벌 시장 진출 전략 및 2026년 목표",
       "url": "https://file.alphasquare.co.kr/media/pdfs/company-report/_260202_LG%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98%2026%EB%85%84%20Top%20Line%20%EC%A0%95%EC%B2%B4%EB%A1%9C%20Premium%20%EA%B0%90%EC%86%8C%ED%95%A0%20%EB%93%AF_%EC%A0%95%EA%B2%BD%ED%9D%AC_161_Online%20report%20_%206_10p_LG%EC%97%90%EB%84%88%EC%A7%80%EC%86%94%EB%A3%A8%EC%85%98.pdf"
     },
     {
-      "query": "LGES의 글로벌 시장 확장 전략 및 2026년 목표",
+      "query": "LGES의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://www.lg.co.kr/media/release/29812"
+    },
+    {
+      "query": "LGES의 글로벌 시장 진출 전략 및 2026년 목표",
       "url": "https://www.eugenefn.com/common/files/amail//20260130_373220_tjdgus2009_898.pdf"
     },
     {
-      "query": "LGES의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://file.alphasquare.co.kr/media/pdfs/company-report/20260129164814733_ko.pdf"
+      "query": "LGES의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://ceoscoredaily.com/page/view/2024122014483553123"
     },
     {
-      "query": "CATL의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://mauto.danawa.com/news/?Tab=N1&Category=&Work=detail&no=5982810"
+      "query": "LGES의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://www.g-enews.com/article/Global-Biz/2026/04/2026040309280363980c8c1c064d_1"
     },
     {
-      "query": "CATL의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://mauto.danawa.com/news/?NewsGroup=M&Tab=N1&Work=detail&no=5945974"
-    },
-    {
-      "query": "CATL의 글로벌 시장 확장 전략 및 2026년 목표",
+      "query": "CATL의 글로벌 시장 진출 전략 및 2026년 목표",
       "url": "https://csf.kiep.go.kr/issueInfoView.es?article_id=59168&mid=a20200000000&search_option=&search_keyword=&search_year=&search_month=&currentPage=1&pageCnt=10&board_id=0"
     },
     {
-      "query": "CATL의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "https://mauto.danawa.com/news/?Tab=N1&NewsGroup=&x=0&y=0&pcUse=n&Work=detail&no=5945416"
+      "query": "CATL의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://www.hanaw.com/main/research/research/download.cmd?bbsSeq=1285227&attachFileSeq=1&bbsId=&dbType=&bbsCd=1260"
     },
     {
-      "query": "CATL의 글로벌 시장 확장 전략 및 2026년 목표",
-      "url": "http://www.autoherald.co.kr/news/articleView.html?idxno=58994"
+      "query": "CATL의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://mauto.danawa.com/news/index.php?Tab=N1&Stab=all&Brand=&Model=&HeadText=&NewsGroup=&SearchKey=&SearchWord=&Punit=10&useOldData=&Page=0&Work=detail&no=5982810"
+    },
+    {
+      "query": "CATL의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://www.g-enews.com/article/Global-Biz/2026/03/2026031208054019240c8c1c064d_1"
+    },
+    {
+      "query": "CATL의 글로벌 시장 진출 전략 및 2026년 목표",
+      "url": "https://www.theguru.co.kr/news/article.html?no=96737"
     },
     {
       "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
@@ -443,19 +385,19 @@
     },
     {
       "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
-      "url": "https://www.g-enews.com/article/Global-Biz/2026/03/2026031818504181480c8c1c064d_1"
-    },
-    {
-      "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
       "url": "https://www.sneresearch.com/kr/insight/release_view/613/page/0"
     },
     {
       "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
-      "url": "https://asiatimes.com/2026/02/under-us-scrutiny-catl-rolls-out-new-batteries-and-investment/"
+      "url": "https://www.g-enews.com/article/Global-Biz/2026/04/2026040309280363980c8c1c064d_1"
     },
     {
       "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
       "url": "https://pv-magazine-usa.com/2026/03/17/u-s-government-confirms-tesla-as-mystery-buyer-in-4-3-billion-lg-energy-solution-lfp-deal/"
+    },
+    {
+      "query": "LGES와 CATL의 2026년 실시간 동향 및 시장 점유율 변화 분석",
+      "url": "https://www.solarpowerworldonline.com/2026/03/lges-tesla-partner-on-4-3-billion-lithium-battery-cell-plant-in-michigan/"
     }
   ]
 }

@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Dict, List
 from datetime import datetime
 
+_FAKE_URL_RE = re.compile(r"^https?://([^\s/]+\.(?:pdf|md|txt|xlsx|csv))$", re.IGNORECASE)
+
 from langgraph.types import interrupt
 
 from src.core.config import RAW_DATA_DIR, get_llm
@@ -409,12 +411,18 @@ _COMPANY_RESEARCH_PROMPT = """\
 - **금지:** `"https://..."`, `"예시 URL"`, 도메인만 쓰기, 짧게 줄인 링크, 가짜·추측 URL.
 - 웹 검색 문서면 `url` 필드 값을, 벡터DB 문서면 메타데이터에 있는 원문 파일/URL을 그대로 사용합니다. 해당 사실을 뒷받침한 **한 출처**를 택해 한 URL만 넣어도 됩니다.
 
-JSON 스키마 예시 (값은 반드시 실제 내용·실제 URL로 채움):
+### `source` 출처 규칙 (매우 중요)
+- 웹 검색 결과 → `https://`로 시작하는 전체 URL 그대로 사용
+- VDB(벡터DB) 결과 → 파일명 그대로 (예: `LGES_사업보고서_2026.pdf`)
+- **금지:** 로컬 파일명(예: LGES_사업보고서.pdf)에 "https://"를 붙이는 것
+- 웹 문서 → https://로 시작하는 URL, VDB 문서 → 파일명 그대로 (https:// 없이)
+
+JSON 스키마 예시 (값은 반드시 실제 내용·실제 출처로 채움):
 {{
   "name": "{company}",
   "items": [
-    {{"content": "…실제 핵심 사실 서술…", "category": "market", "source": "https://실제-도메인/경로?쿼리=값"}},
-    {{"content": "…", "category": "strengths", "source": "https://다른-전체-URL"}}
+    {{"content": "…실제 핵심 사실 서술…", "category": "market", "source": "https://example.com/article"}},
+    {{"content": "…", "category": "strengths", "source": "LGES_사업보고서_2026.pdf"}}
   ]
 }}
 
@@ -469,6 +477,13 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
         data = json.loads(match.group(0)) if match else {}
     except Exception:
         data = {"name": company, "items": []}
+
+    # 가짜 URL 정제: "https://파일명.pdf" → "파일명.pdf"
+    if isinstance(data.get("items"), list):
+        for item in data["items"]:
+            m = _FAKE_URL_RE.match(item.get("source", ""))
+            if m:
+                item["source"] = m.group(1)
 
     return data
 
