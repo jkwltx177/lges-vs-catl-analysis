@@ -307,8 +307,11 @@ class ReportGraphState(TypedDict, total=False):
 
     # merge_node 출력
     final_report: str
-    final_report_md_path: str      # 저장된 .md 경로
+    final_report_md_path: str      # 저장된 .md 경로 (report/final/)
     final_report_pdf_path: str      # 저장된 .pdf 경로 (실패 시 빈 문자열 가능)
+    final_report_docs_md_path: str   # docs/ 동일 stem .md
+    final_report_docs_pdf_path: str   # docs/ 동일 stem .pdf (실패 시 빈 문자열)
+    report_file_path: str  # startup-invest-agent와 동일: PDF 성공 시 PDF, 실패 시 MD (주로 report/final 기준)
 
     # 제어 필드
     retry_count: int

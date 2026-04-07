@@ -9,6 +9,8 @@ Task.4 보고서 LangGraph — 실행 순서:
 
 from __future__ import annotations
 
+import src.core.env  # noqa: F401 — 섹션 LLM이 `.env`의 OPENAI_API_KEY 사용
+
 from langgraph.graph import END, START, StateGraph
 
 from src.nodes.report.bridge import bridge_from_analysis

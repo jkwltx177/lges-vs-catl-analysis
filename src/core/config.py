@@ -3,11 +3,13 @@
 import os
 from pathlib import Path
 
+import src.core.env  # noqa: F401 — 프로젝트 .env 선로드 (OPENAI_API_KEY)
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 import chromadb
 from chromadb.config import Settings
 
+# env 모듈 이후에도 cwd 기준 .env 보조 (이중 호출 무방)
 load_dotenv()
 
 # ----------------------------------------------------------------

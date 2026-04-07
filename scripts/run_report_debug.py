@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """
-앞단(조사·정제·분석) 없이 보고서 Task.4만 미리 돌려보기.
+보고서 Task.4 단독 디버그.
 
-  # 레이아웃만 (LLM/API 없음) — 제목·작성일·요약·목차·참고문헌 순서·MD/PDF 저장 확인
+  # merge만 (LLM 없음 — 레이아웃·MD/PDF 경로 확인)
   PYTHONPATH=. python scripts/run_report_debug.py --merge-only
 
-  # 전체 그래프 + 스텁 LLM (API 키 없이 섹션 문단 스텁)
-  PYTHONPATH=. python scripts/run_report_debug.py --stub
-
-  # 전체 그래프 + .env 의 OPENAI_API_KEY 로 실제 생성
+  # 보고서 그래프 전체 — 프로젝트 루트 `.env`의 OPENAI_API_KEY 필수
   PYTHONPATH=. python scripts/run_report_debug.py
 
 프로젝트 루트에서 실행하는 것을 권장합니다.
@@ -17,11 +14,9 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
-# 프로젝트 루트를 path에 (스크립트 직접 실행 시)
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -55,7 +50,6 @@ def _mock_raw_findings():
 
 
 def build_mock_analysis_state():
-    """분석 단계가 끝난 것처럼 최소 필드를 채운 AnalysisGraphState."""
     from src.state.state import (
         AnalysisGraphState,
         CompanyPortfolio,
@@ -127,7 +121,6 @@ def build_mock_analysis_state():
 
 
 def _mock_prefilled_sections():
-    """merge-only용: LLM 없이 섹션 문자열만 채움."""
     return {
         "section0": (
             "- **LGES (한 줄):** 북미·유럽 OEM·규제 대응·프리미엄 포지셔닝.\n"
@@ -154,14 +147,6 @@ def run_merge_only():
     return merge_node(initial)
 
 
-def run_full_graph(*, stub: bool):
-    from src.core.report_workflow import run_report_from_analysis
-
-    if stub:
-        os.environ["OPENAI_API_KEY"] = ""
-    return run_report_from_analysis(build_mock_analysis_state())
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="보고서 파이프라인 단독 디버그")
     parser.add_argument(
@@ -169,36 +154,38 @@ def main() -> int:
         action="store_true",
         help="merge_node만 실행(LLM 없음). 레이아웃·MD/PDF 경로 확인용",
     )
-    parser.add_argument(
-        "--stub",
-        action="store_true",
-        help="전체 그래프를 OPENAI_API_KEY 없이 스텁 LLM으로 실행",
-    )
     args = parser.parse_args()
 
-    from dotenv import load_dotenv
-
-    load_dotenv(_ROOT / ".env")
+    import src.core.env  # noqa: F401
 
     if args.merge_only:
         out = run_merge_only()
         print("=== merge-only ===")
         print("final_report_md_path:", out.get("final_report_md_path"))
         print("final_report_pdf_path:", out.get("final_report_pdf_path") or "(PDF 실패 또는 미생성)")
+        print("final_report_docs_md_path:", out.get("final_report_docs_md_path"))
+        print("final_report_docs_pdf_path:", out.get("final_report_docs_pdf_path") or "(PDF 실패 또는 미생성)")
+        print("report_file_path:", out.get("report_file_path") or "")
         print("warnings:", out.get("warnings"))
         print("\n--- final_report 앞 1200자 ---\n")
         print((out.get("final_report") or "")[:1200])
         return 0
 
-    if args.stub:
-        os.environ.pop("OPENAI_API_KEY", None)
-        os.environ["OPENAI_API_KEY"] = ""
+    from src.agents.full_pipeline_graph import check_openai_config
+    from src.core.report_workflow import run_report_from_analysis
 
-    result = run_full_graph(stub=args.stub)
-    print("=== report graph ===")
-    print("stub_mode:", bool(args.stub))
+    ok, msg = check_openai_config()
+    if not ok:
+        print(msg, file=sys.stderr)
+        return 1
+
+    result = run_report_from_analysis(build_mock_analysis_state())
+    print("=== report graph (OPENAI_API_KEY 사용) ===")
     print("final_report_md_path:", result.get("final_report_md_path"))
     print("final_report_pdf_path:", result.get("final_report_pdf_path") or "(PDF 실패 또는 미생성)")
+    print("final_report_docs_md_path:", result.get("final_report_docs_md_path"))
+    print("final_report_docs_pdf_path:", result.get("final_report_docs_pdf_path") or "(PDF 실패 또는 미생성)")
+    print("report_file_path:", result.get("report_file_path") or "")
     print("warnings:", result.get("warnings"))
     print("\n--- final_report 앞 1500자 ---\n")
     print((result.get("final_report") or "")[:1500])

@@ -19,8 +19,8 @@ def build_report_context(
     state: ReportGraphState,
     *,
     mode: str,
-    max_raw_chars_per_finding: int = 1200,
-    max_findings: int = 24,
+    max_raw_chars_per_finding: int = 800,
+    max_findings: int = 20,
 ) -> str:
     """
     mode: section1 | section2 | section3 | section4 | section5 | section0 | section6
@@ -59,7 +59,7 @@ def build_report_context(
         parts.append("\n## Already drafted sections (for SUMMARY only; synthesize, do not repeat verbatim)\n")
         for k in ("section1", "section2", "section3", "section4", "section5"):
             body = sec.get(k) or ""
-            parts.append(f"### {k}\n\n{body[:8000]}\n")
+            parts.append(f"### {k}\n\n{body[:12000]}\n")
 
     if mode == "section6":
         parts.append("\n## Raw findings (full sources for REFERENCE)\n")

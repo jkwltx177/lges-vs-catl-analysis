@@ -4,19 +4,23 @@
   제목 → **SUMMARY(제목 직하)** → 작성일 → 목차
   → **서론** → **본론** → **결론**(종합 시사점 + 결론 요약) → **참고문헌**
 
-산출물: `report/final/`에 `.md` + `.pdf` (PDF 실패 시 MD만 경로 반환, warnings에 기록).
+산출물: `report/final/` 및 **`docs/`**에 동일 stem으로 `.md` + `.pdf` 저장.
+PDF는 WeasyPrint 우선, 실패 시 fpdf2 폴백. 둘 다 실패 시 MD만 경로 반환·warnings. `docs/report_pipeline_health_*.md`에 섹션·입력 점검 로그.
 """
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 from src.report.pdf_export import (
     default_report_stem,
     format_report_date_korean,
     parse_or_today,
+    primary_report_path,
     write_report_artifacts,
 )
+from src.report.pipeline_health import build_pipeline_health_markdown
 from src.state.state import ReportGraphState
 
 DEFAULT_TITLE_PLAIN = "글로벌 배터리 패러다임 전환기: LGES vs CATL 전략 비교 분석"
@@ -30,6 +34,7 @@ _SUB_CONCLUSION_SUMMARY = "### 결론 요약"
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _DEFAULT_OUTPUT_DIR = _PROJECT_ROOT / "report" / "final"
+_DOCS_OUTPUT_DIR = _PROJECT_ROOT / "docs"
 
 _TOC_MARKDOWN = """## 목차
 
@@ -48,7 +53,7 @@ def _title_from_state(state: ReportGraphState) -> str:
     return DEFAULT_TITLE_PLAIN
 
 
-def _conclusion_summary_from_section0(section0: str, *, max_chars: int = 1200) -> str:
+def _conclusion_summary_from_section0(section0: str, *, max_chars: int = 2400) -> str:
     t = (section0 or "").strip()
     if not t:
         return "*※ SUMMARY가 비어 있어 결론 요약을 생략합니다.*"
@@ -129,23 +134,61 @@ def build_final_report_markdown(state: ReportGraphState) -> str:
 def merge_node(state: ReportGraphState) -> dict:
     final_report = build_final_report_markdown(state)
     stem = default_report_stem()
-    out_dir = _DEFAULT_OUTPUT_DIR
     md_path, pdf_path, pdf_ok = write_report_artifacts(
         final_report,
-        output_dir=out_dir,
+        output_dir=_DEFAULT_OUTPUT_DIR,
         stem=stem,
     )
+    md_path_docs, pdf_path_docs, pdf_ok_docs = write_report_artifacts(
+        final_report,
+        output_dir=_DOCS_OUTPUT_DIR,
+        stem=stem,
+    )
+    if pdf_ok and not pdf_ok_docs:
+        try:
+            dest_pdf = Path(pdf_path).name
+            dest = _DOCS_OUTPUT_DIR / dest_pdf
+            shutil.copy2(pdf_path, dest)
+            pdf_path_docs = str(dest.resolve())
+            pdf_ok_docs = True
+        except OSError:
+            pass
+
+    health_md = build_pipeline_health_markdown(
+        state,
+        md_path=md_path_docs,
+        pdf_path=pdf_path_docs if pdf_ok_docs else "",
+        pdf_ok=pdf_ok_docs,
+    )
+    health_path = _DOCS_OUTPUT_DIR / f"report_pipeline_health_{stem}.md"
+    try:
+        health_path.write_text(health_md, encoding="utf-8")
+    except OSError:
+        pass
 
     warnings = list(state.get("warnings") or [])
     if not pdf_ok:
         warnings.append(
-            "PDF 변환 실패(WeasyPrint 또는 시스템 폰트). Markdown 파일은 저장되었습니다."
+            "PDF 변환 실패(WeasyPrint·fpdf2 모두 실패 또는 한글 폰트 없음). REPORT_PDF_FONT로 .ttf 지정 가능. Markdown은 저장됨."
         )
+    if not pdf_ok_docs and pdf_ok:
+        warnings.append("docs/ 폴더에 PDF 저장이 실패했습니다. report/final의 PDF를 확인하세요.")
+
+    sec = state.get("sections") or {}
+    for key in ("section0", "section1", "section2", "section3", "section4", "section5", "section6"):
+        body = (sec.get(key) or "").strip()
+        if not body:
+            warnings.append(
+                f"보고서 섹션 누락: {key} — 본문이 비어 있습니다. pipeline_health 파일을 확인하세요."
+            )
 
     return {
         "final_report": final_report,
         "final_report_md_path": md_path,
         "final_report_pdf_path": pdf_path if pdf_ok else "",
+        "final_report_docs_md_path": md_path_docs,
+        "final_report_docs_pdf_path": pdf_path_docs if pdf_ok_docs else "",
+        "report_file_path": primary_report_path(md_path, pdf_path, pdf_ok),
         "warnings": warnings,
     }
 
