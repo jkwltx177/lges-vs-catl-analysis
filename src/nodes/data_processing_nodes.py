@@ -33,7 +33,7 @@ class PydanticMarketContext(BaseModel):
 
 class PydanticCompanyPortfolio(BaseModel):
     core_services: List[str]
-    revenue_contribution: Dict[str, str]
+    revenue_contribution: List[str] = Field(description="각 서비스별 매출 기여도 추정치 (예: 'BEV 배터리 62%')", default_factory=list)
     diversification_type: str
     diversification_stage: str
     core_competency: str

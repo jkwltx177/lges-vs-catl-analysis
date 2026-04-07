@@ -40,7 +40,7 @@ class CompanySWOT(TypedDict):
 
 class CompanyPortfolio(TypedDict):
     core_services: List[str]
-    revenue_contribution: Dict[str, str]   # e.g. {"BEV 배터리": "62%"}
+    revenue_contribution: List[str]        # e.g. ["BEV 배터리 62%"]
     diversification_type: str              # 수직 / 수평 / 비관련
     diversification_stage: str             # 투자 / 수익화
     core_competency: str
