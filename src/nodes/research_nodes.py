@@ -154,8 +154,6 @@ def _classify_query(query: str) -> tuple:
 
     if has_web and not has_vdb:
         route = "web"
-    elif has_vdb and not has_web:
-        route = "vectordb"
     else:
         route = "both"
 
@@ -229,7 +227,7 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
 
     docs = []
     for item in target_queries:
-        results = web_search(item["query"], max_results=3)
+        results = web_search(item["query"], max_results=5)
         for r in results:
             docs.append(
                 {
@@ -432,6 +430,11 @@ def merge_results_node(state: ResearchGraphState) -> Dict:
             "min_distance": round(min(distances), 4) if distances else None,
             "has_vdb": any(d.get("source_type") == "vector_db" for d in docs),
             "has_web": any(d.get("source_type") == "web_search" for d in docs),
+            "web_urls": [
+                d.get("url", "")
+                for d in docs
+                if d.get("source_type") == "web_search" and d.get("url")
+            ],
         }
 
     token_usage = update_token_usage(state)
@@ -599,6 +602,13 @@ def build_output_node(state: ResearchGraphState) -> Dict:
 
     # findings.json 저장
     findings_path = RAW_DATA_DIR / "findings.json"
+    all_web_sources = [
+        {"query": q, "url": url}
+        for q, info in state.get("query_coverage", {}).items()
+        for url in info.get("web_urls", [])
+        if url
+    ]
+
     findings_data = {
         "summary": result.get("summary", ""),
         "key_findings": result.get("key_findings", []),
@@ -609,6 +619,7 @@ def build_output_node(state: ResearchGraphState) -> Dict:
         "token_usage": state.get("token_usage", {}),
         "warnings": state.get("warnings", []),
         "raw_findings": raw_findings,
+        "web_sources": all_web_sources,
     }
 
     try:
@@ -703,6 +714,9 @@ def human_review_node(state: ResearchGraphState) -> Dict:
             src_str = f"[{'+'.join(sources)}]" if sources else "[없음]"
             gap_marker = "  ← 갭" if sym == "✗" else ""
             lines.append(f"  {sym} {query:<40} {avg_str}  {count}건  {src_str}{gap_marker}")
+            for url in info.get("web_urls", []):
+                if url:
+                    lines.append(f"       └ {url}")
             if sym == "✗":
                 gap_queries.append(query)
     else:
