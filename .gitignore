@@ -26,12 +26,18 @@ wheels/
 
 # Environments
 .env
-.venv
-env/
+.venv/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
+
+# Cache & local output (startup-invest-agent 패턴)
+.cache/
+output/
+*.db
+*.sqlite
 
 # Data Folders (Keep directory structure but ignore contents)
 data/processed/*

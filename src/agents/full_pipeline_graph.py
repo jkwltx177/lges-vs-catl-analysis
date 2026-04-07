@@ -27,3 +27,13 @@ def run_research_refine_analysis(initial_state: Dict[str, Any], thread_prefix: s
 
     analysis_graph = get_compiled_analysis_graph()
     return analysis_graph.invoke(analysis_input, config=analysis_config)
+
+
+def run_full_pipeline_with_report(initial_state: Dict[str, Any], thread_prefix: str = "e2e") -> Dict[str, Any]:
+    """Research → Refine → Analysis → Report(섹션·merge·MD/PDF)."""
+    from src.core.report_workflow import run_report_from_report_state
+    from src.nodes.report.bridge import bridge_from_analysis
+
+    analysis = run_research_refine_analysis(initial_state, thread_prefix=thread_prefix)
+    report_input = bridge_from_analysis(analysis)
+    return run_report_from_report_state(report_input)

@@ -298,11 +298,17 @@ class ReportGraphState(TypedDict, total=False):
     company_b_portfolio: CompanyPortfolio
     raw_findings: Annotated[List[ResearchFinding], operator.add]
 
+    # 보고서 메타 (선택 — 없으면 merge 시점 기본값)
+    report_title: str              # 표지 제목 (기본: 프로젝트 정식 제목)
+    report_date: str               # YYYY-MM-DD, 없으면 merge 실행일
+
     # 병렬 섹션 노드 출력 — merge_sections reducer로 키 단위 병합
     sections: Annotated[ReportSectionState, merge_sections]
 
     # merge_node 출력
     final_report: str
+    final_report_md_path: str      # 저장된 .md 경로
+    final_report_pdf_path: str      # 저장된 .pdf 경로 (실패 시 빈 문자열 가능)
 
     # 제어 필드
     retry_count: int
