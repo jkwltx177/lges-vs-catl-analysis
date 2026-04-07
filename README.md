@@ -39,7 +39,9 @@
 - Agent of 보고서 작성: 분석 결과를 섹션별 보고서 초안으로 작성하고, SUMMARY, 비교 SWOT, 전략 제언, 레퍼런스까지 포함한 최종 Markdown/PDF 결과물로 병합 및 저장합니다.
 
 ## Architecture
-(그래프 이미지)
+![Research Pipeline Architecture](./research_pipeline_architecture_v2.svg)
+
+위 다이어그램은 자료 조사 단계의 전체 흐름을 중심으로 정리한 아키텍처입니다. 전체 시스템은 `Research → Refine → Analysis → Report` 4단계로 연결되며, Research 단계에서 수집된 근거가 이후 정제, 분석, 보고서 작성 단계의 입력으로 사용됩니다.
 
 실제 구현 파이프라인은 아래와 같습니다.
 
