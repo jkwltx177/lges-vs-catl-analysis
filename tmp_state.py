@@ -22,7 +22,6 @@ from typing import Annotated, Dict, List, Optional, TypedDict
 class RawItem(TypedDict):
     content: str
     category: str  # strengths / weaknesses / opportunities / threats / market
-    source: str    # 원문 출처 (URL 또는 Agent 이름)
 
 
 class SWOTItem(TypedDict):
@@ -40,7 +39,7 @@ class CompanySWOT(TypedDict):
 
 class CompanyPortfolio(TypedDict):
     core_services: List[str]
-    revenue_contribution: Dict[str, str] | List[str]  # Task2 output or normalized mapping
+    revenue_contribution: Dict[str, str]   # e.g. {"BEV 배터리": "62%"}
     diversification_type: str              # 수직 / 수평 / 비관련
     diversification_stage: str             # 투자 / 수익화
     core_competency: str
@@ -73,12 +72,6 @@ class ResearchFinding(TypedDict):
     sources: List[str]     # 출처 URL / 문헌 목록
 
 
-class SearchPlanItem(TypedDict):
-    query: str
-    route: str             # "web" | "vectordb" | "both"
-    company_filter: Optional[str]  # "LGES" | "CATL" | "Market" | None
-
-
 # ================================================================
 # Custom Reducer
 # ================================================================
@@ -103,7 +96,7 @@ class ResearchGraphState(TypedDict, total=False):
 
     # Query Generation 출력
     query_set: List[str]
-    search_plan: List[SearchPlanItem]
+    search_plan: List[str]
 
     # Retrieval 출력 (병렬 노드가 동시에 쓰므로 operator.add로 누적)
     raw_documents: Annotated[List[Dict], operator.add]
@@ -185,66 +178,29 @@ class DataRefineGraphState(TypedDict, total=False):
 
 
 # ================================================================
-# Analysis Sub-Types
-# ================================================================
-
-class SwotItem(TypedDict):
-    """개별 SWOT 항목 (기본 단위)."""
-    point: str
-    evidence: str
-    source: str
-
-
-class EnrichedSwotItem(TypedDict, total=False):
-    """SWOT 항목 + 전략적 맥락."""
-    point: str
-    evidence: str
-    why_it_matters: str
-    impact: str
-
-
-class ComparativePoint(TypedDict, total=False):
-    """LGES vs CATL 비교 분석 포인트."""
-    dimension: str
-    lges_position: str
-    catl_position: str
-    relative_advantage: str
-
-
-class ResilienceEvaluation(TypedDict, total=False):
-    """EV 캐즘기 회복탄력성 평가."""
-    total_score_lges: float
-    total_score_catl: float
-    winner: str
-    evaluation_summary: str
-    evaluation_factors: List[str]
-
-
-# ================================================================
 # Analysis Sub-States
 # ================================================================
 
 class CategoryAnalysisState(TypedDict, total=False):
-    lges_items: List[EnrichedSwotItem]
-    catl_items: List[EnrichedSwotItem]
-    comparative_points: List[ComparativePoint]
+    lges_items: List[Dict]             # LGES 해당 카테고리 분석 항목
+    catl_items: List[Dict]             # CATL 해당 카테고리 분석 항목
+    comparative_points: List[Dict]     # 양사 간 상대적 우위·열위 비교
     strategic_implications: List[str]  # 카테고리별 전략적 시사점
 
 
 class ComparativeSwotState(TypedDict, total=False):
-    lges_matrix: Dict[str, List[EnrichedSwotItem]]
-    catl_matrix: Dict[str, List[EnrichedSwotItem]]
-    comparative_summary: str
-    strategic_positioning: str
+    S: Dict
+    W: Dict
+    O: Dict
+    T: Dict
     consistency_flags: List[str]
 
 
-class FinalInsight(TypedDict, total=False):
-    key_differences: List[str]
-    resilience_evaluation: ResilienceEvaluation
-    strategic_winner: str
-    final_insights: List[str]
-    validation_notes: Optional[List[str]]
+class InsightState(TypedDict, total=False):
+    key_differences: List[str]      # 양사 핵심 차이점
+    resilience_evaluation: Dict     # EV 캐즘기 회복탄력성 평가
+    strategic_winner: str           # 전략적 우위 기업 판단
+    final_insights: List[str]       # 최종 전략적 시사점 목록
 
 
 # ================================================================
@@ -258,14 +214,7 @@ class AnalysisGraphState(TypedDict, total=False):
     company_b_portfolio: CompanyPortfolio
     company_a_swot: CompanySWOT
     company_b_swot: CompanySWOT
-    # Task.1 기업 조사 JSON + Task.2 정제 항목 — 참고문헌 URL 추출용 (보고서 section6·부록)
-    company_a: CompanyRaw
-    company_b: CompanyRaw
-    company_a_cleaned: List[RawItem]
-    company_b_cleaned: List[RawItem]
     raw_findings: Annotated[List[ResearchFinding], operator.add]
-    # Task.1 조사 쿼리 커버리지 (Refine에서 전달 — 보고서 부록용)
-    query_coverage: Dict[str, Dict]
 
     # 병렬 SWOT 분석 에이전트 출력 (교차 기록 금지)
     swot_S: CategoryAnalysisState   # Strength 분석 에이전트 전용
@@ -275,11 +224,7 @@ class AnalysisGraphState(TypedDict, total=False):
 
     # context_integration_node / insight_node 출력
     comparative_swot: ComparativeSwotState
-    final_insight: FinalInsight
-
-    # 내부 라우팅 필드
-    review_status: str
-    consistency_flags: List[str]
+    final_insight: InsightState
 
     # 제어 필드
     retry_count: int
@@ -306,32 +251,16 @@ class ReportGraphState(TypedDict, total=False):
     # bridge_node_3에서 주입 (AnalysisGraphState → ReportGraphState)
     market_context: MarketContext
     comparative_swot: ComparativeSwotState
-    final_insight: FinalInsight
+    final_insight: InsightState
     company_a_portfolio: CompanyPortfolio
     company_b_portfolio: CompanyPortfolio
-    company_a: CompanyRaw
-    company_b: CompanyRaw
-    company_a_cleaned: List[RawItem]
-    company_b_cleaned: List[RawItem]
-    company_a_swot: CompanySWOT
-    company_b_swot: CompanySWOT
     raw_findings: Annotated[List[ResearchFinding], operator.add]
-    query_coverage: Dict[str, Dict]  # Task.1 → Report 부록
-
-    # 보고서 메타 (선택 — 없으면 merge 시점 기본값)
-    report_title: str              # 표지 제목 (기본: 프로젝트 정식 제목)
-    report_date: str               # YYYY-MM-DD, 없으면 merge 실행일
 
     # 병렬 섹션 노드 출력 — merge_sections reducer로 키 단위 병합
     sections: Annotated[ReportSectionState, merge_sections]
 
     # merge_node 출력
     final_report: str
-    final_report_md_path: str      # 저장된 .md 경로 (report/final/)
-    final_report_pdf_path: str      # 저장된 .pdf 경로 (실패 시 빈 문자열 가능)
-    final_report_docs_md_path: str   # docs/ 동일 stem .md
-    final_report_docs_pdf_path: str   # docs/ 동일 stem .pdf (실패 시 빈 문자열)
-    report_file_path: str  # startup-invest-agent와 동일: PDF 성공 시 PDF, 실패 시 MD (주로 report/final 기준)
 
     # 제어 필드
     retry_count: int

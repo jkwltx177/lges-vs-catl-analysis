@@ -1,6 +1,6 @@
 """BGE-M3 임베딩 + Chroma VectorDB 검색 도구."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from src.core.config import CHROMA_COLLECTION_NAME, get_chroma_client
 
@@ -25,8 +25,10 @@ def _get_model():
 def embed_texts(texts: List[str]) -> List[List[float]]:
     """텍스트 목록을 BGE-M3로 임베딩하여 벡터 목록 반환."""
     model = _get_model()
-    result = model.encode(texts, batch_size=12, max_length=8192)
-    return result["dense_vecs"].tolist()
+    result = cast(Dict[str, Any], model.encode(texts, batch_size=12, max_length=8192))
+    # dense_vecs는 numpy array 또는 list 형태이며, 각 요소는 float 리스트여야 함
+    # np.float16은 ChromaDB에서 오류를 유발할 수 있으므로 표준 float으로 변환
+    return [[float(x) for x in vec] for vec in result["dense_vecs"]]
 
 
 def vectordb_search(

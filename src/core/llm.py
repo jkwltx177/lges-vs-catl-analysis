@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+from functools import lru_cache
+from pydantic import SecretStr
 from typing import Any, Mapping, Optional, cast
 
 import src.core.env  # noqa: F401 — 프로젝트 .env 선로드
@@ -57,17 +59,21 @@ def invoke_json(prompt: str, payload: Mapping[str, Any]) -> Optional[dict[str, A
     client = get_client()
     if client is None:
         return None
-    response = client.responses.create(
-        model=get_model_name(),
-        input=[
-            {"role": "system", "content": [{"type": "input_text", "text": prompt}]},
-            {
-                "role": "user",
-                "content": [{"type": "input_text", "text": json.dumps(payload, ensure_ascii=False)}],
-            },
-        ],
-    )
-    output_text = getattr(response, "output_text", "")
+
+    try:
+        response = client.chat.completions.create(
+            model=get_model_name(),
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+            ],
+            response_format={"type": "json_object"}
+        )
+        output_text = response.choices[0].message.content
+    except Exception as e:
+        print(f"[LLM Error] {e}")
+        return None
+
     if not output_text:
         return None
     return parse_json_object(output_text)
@@ -95,7 +101,7 @@ def get_chat_model(
     kwargs: dict[str, Any] = {
         "model": model or os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         "temperature": temperature,
-        "api_key": api_key,
+        "api_key": SecretStr(api_key),
     }
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens

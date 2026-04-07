@@ -13,7 +13,7 @@ import argparse
 import re
 import uuid
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pymupdf4llm
 
@@ -157,7 +157,7 @@ def chunk_by_structure(markdown: str, llm, base_meta: Dict) -> List[Dict]:
 
 def pdf_to_markdown(pdf_path: str) -> str:
     """pymupdf4llm으로 PDF를 Markdown으로 변환."""
-    return pymupdf4llm.to_markdown(pdf_path)
+    return str(pymupdf4llm.to_markdown(pdf_path))
 
 # ----------------------------------------------------------------
 # Chroma 적재
@@ -233,7 +233,7 @@ def ingest_pdf(pdf_path: str, llm=None) -> int:
     return len(chunks)
 
 
-def ingest_all(data_dir: str = None) -> None:
+def ingest_all(data_dir: Optional[str] = None) -> None:
     """data/raw/ 내 모든 PDF 파일을 일괄 적재."""
     directory = Path(data_dir) if data_dir else RAW_DATA_DIR
     pdfs = list(directory.glob("*.pdf"))

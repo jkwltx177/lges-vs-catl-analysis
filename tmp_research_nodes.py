@@ -1,20 +1,14 @@
 """Research Agent 14개 노드 구현."""
 
 import json
-import os
 import re
 from pathlib import Path
-import json
-import os
-import re
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Mapping, Sequence, cast
+from typing import Dict, List
 
 from langgraph.types import interrupt
 
 from src.core.config import RAW_DATA_DIR, get_llm
-from src.state.state import CompanyRaw, ResearchFinding, ResearchGraphState, SearchPlanItem
+from src.state.state import ResearchFinding, ResearchGraphState
 from src.tools.token_manager import update_token_usage
 from src.tools.vectordb_tool import vectordb_search
 from src.tools.web_search_tool import web_search
@@ -54,85 +48,66 @@ def initialize_node(state: ResearchGraphState) -> Dict:
 # 2. query_generation_node
 # ================================================================
 
-
-
-# 1. 프롬프트 개선: 페르소나 주입 및 조사 카테고리 세분화
 _QUERY_PROMPT = """\
-당신은 10년 차 배터리 산업 전문 수석 애널리스트입니다. 
-단순한 뉴스 검색을 넘어, 기업의 실질적인 경쟁력과 리스크를 파악할 수 있는 고품질 리서치 쿼리를 생성하세요.
+당신은 배터리 산업 전문 조사 에이전트입니다.
+다음 주제에 대해 SWOT 분석(강점/약점/기회/위협)에 필요한 검색 쿼리를 최소 12개 생성하세요.
 
-[분석 환경]
-- 현재 시점: {current_date}
-- 목표: {goal}
-- 대상 기업: {companies}
-- 보고서 주제: {topic}
+목표: {goal}
+대상 기업: {companies}
+보고서 주제: {topic}
 
-[요구사항]
-- **SWOT 균형**: 강점/약점/기회/위협 각 축당 최소 3개씩, 총 12개 이상의 쿼리 생성.
-- **심층 조사**: 단순 근황보다는 '재무 건전성', '특허 및 기술 로드맵', '공급망(LFP/하이니켈)', 'IRA/CRMA 정책 대응' 등 전문 영역을 포함할 것.
-- **최신성**: 반드시 2025년 하반기 실적과 2026년 실시간 동향을 타겟팅할 것.
-- **비교 분석**: 양사의 시장 점유율 역전 가능성이나 기술 격차를 직접 대조하는 쿼리 포함.
+요구사항:
+- SWOT 4개 축 각각에 3개 이상의 쿼리 포함
+- 각 기업별 쿼리 포함 (LGES 단독, CATL 단독, 양사 비교)
+- 최신 동향(2025~2026) 관련 쿼리 포함
+- 시장/산업 맥락 쿼리 포함
 
 JSON 배열 형식으로만 출력하세요:
 ["쿼리1", "쿼리2", ...]
 """
 
-def get_dynamic_fallback_queries(companies: List[str]) -> List[str]:
-    """현재 연도(2026년)를 반영한 동적 Fallback 쿼리 생성"""
-    curr_year = datetime.now().year # 2026
-    c1, c2 = (companies[0], companies[1]) if len(companies) >= 2 else ("LGES", "CATL")
-    
-    return [
-        f"{c1} {curr_year} 1분기 영업이익률 및 재무 건전성 분석",
-        f"{c2} 유럽 LFP 배터리 공장 가동 현황 및 2026 점유율 전망",
-        f"{c1} vs {c2} 차세대 전고체 배터리 특허 및 샘플 공급 현황",
-        f"2026년 미국 IRA 보조금 정책 변화가 {c1} 북미 사업에 미치는 영향",
-        f"{c2}의 헝가리 및 독일 생산 거점 효율성 및 물류 리스크",
-        f"전기차 캐즘 돌파를 위한 {c1}의 ESS 사업 비중 확대 전략",
-        f"{c2} 나트륨 이온 배터리 상용화 수준과 저가형 시장 지배력",
-        f"{c1} 하이니켈 NCMA 배터리 수율 및 주요 고객사 이탈 여부",
-        f"글로벌 완성차 업체(OEM)의 배터리 내재화가 {c1}, {c2}에 미치는 위협",
-        f"2026년 배터리 리사이클링 시장 규모 및 {c1}의 합작법인(JV) 현황",
-        f"{c2} 광산 지분 확보를 통한 원자재 수직 계열화 현황",
-        f"리튬/니켈 가격 변동에 따른 {c1} vs {c2} 원가 경쟁력 비교"
-    ]
 
 def query_generation_node(state: ResearchGraphState) -> Dict:
-    """LLM → 전문가적 관점의 SWOT 쿼리 생성 (최소 12개 보장)."""
+    """LLM → SWOT 축별 쿼리 생성 (최소 12개)."""
     llm = _get_llm()
-    target_companies = state.get("target_companies", ["LGES", "CATL"])
-    companies_str = ", ".join(target_companies)
-    
-    # 현재 날짜 반영하여 최신성 강조
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    
+    companies = ", ".join(state.get("target_companies", ["LGES", "CATL"]))
     prompt = _QUERY_PROMPT.format(
-        current_date=current_date,
-        goal=state.get("goal", "상세 비교 분석"),
-        companies=companies_str,
-        topic=state.get("report_topic", "배터리 산업 분석"),
+        goal=state.get("goal", ""),
+        companies=companies,
+        topic=state.get("report_topic", ""),
     )
 
     missing = state.get("missing_topics", [])
     if missing:
-        prompt += f"\n\n[중요] 이전 조사에서 다음 내용이 부족했습니다. 이를 보완할 초정밀 쿼리를 추가하세요:\n{missing}"
+        prompt += f"\n\n특히 다음 누락 주제를 보완하는 쿼리를 추가하세요:\n{missing}"
 
     response = llm.invoke(prompt)
-    raw = str(response.content).strip()
+    raw = response.content.strip()
 
     # JSON 파싱
     try:
-        # JSON 배열 추출 정교화
-        match = re.search(r"\[\s*?\".*?\"\s*?\]", raw, re.DOTALL)
+        match = re.search(r"\[.*\]", raw, re.DOTALL)
         queries: List[str] = json.loads(match.group(0)) if match else []
-    except Exception as e:
-        print(f"[Query Gen Error] 파싱 실패: {e}")
+    except Exception:
         queries = []
 
+    # 최소 12개 보장 (파싱 실패 시 기본 쿼리)
     if len(queries) < 12:
-        print(f"[Query Gen] 생성된 쿼리 부족({len(queries)}개). 동적 Fallback 쿼리를 주입합니다.")
-        fallback = get_dynamic_fallback_queries(target_companies)
-        queries = list(set(queries + fallback))[:12]
+        queries += [
+            "LGES 배터리 기술 경쟁력 2025",
+            "CATL 시장점유율 2025",
+            "EV 배터리 시장 전망 2025",
+            "LGES 북미 사업 현황",
+            "CATL 나트륨이온 배터리",
+            "EV 캐즘 배터리 업계 영향",
+            "LGES CATL 비교 분석",
+            "배터리 공급망 IRA 영향",
+            "LGES 약점 재무 현황",
+            "CATL 글로벌 전략",
+            "전기차 배터리 기회 요인",
+            "배터리 위협 경쟁사 분석",
+        ]
+        queries = queries[:12]
 
     return {"query_set": queries}
 
@@ -141,8 +116,8 @@ def query_generation_node(state: ResearchGraphState) -> Dict:
 # 3. strategy_routing_node
 # ================================================================
 
-_WEB_KEYWORDS = {"최신", "2026", "2025", "뉴스", "발표", "출시", "최근", "어제", "today", "news", "IRA", "CRMA", "policy"}
-_VDB_KEYWORDS = {"전략", "IR", "사업보고서", "기술", "연구", "특허", "실적", "재무", "annual", "report" ,"JV", "yield"}
+_WEB_KEYWORDS = {"최신", "2026", "2025", "뉴스", "발표", "출시", "최근", "어제", "today", "news"}
+_VDB_KEYWORDS = {"전략", "IR", "사업보고서", "기술", "연구", "특허", "실적", "재무", "annual", "report"}
 _MARKET_KEYWORDS = {"시장", "산업", "동향", "캐즘", "점유율", "tam", "cagr", "전망", "규모", "트렌드", "market", "industry"}
 _LGES_KEYWORDS = {"lges", "lg에너지", "엘지에너지", "lgエネ"}
 _CATL_KEYWORDS = {"catl", "닝더스다이", "寧德時代"}
@@ -159,6 +134,8 @@ def _classify_query(query: str) -> tuple:
 
     if has_web and not has_vdb:
         route = "web"
+    elif has_vdb and not has_web:
+        route = "vectordb"
     else:
         route = "both"
 
@@ -181,7 +158,7 @@ def _classify_query(query: str) -> tuple:
 
 def strategy_routing_node(state: ResearchGraphState) -> Dict:
     """쿼리 단위 map — 각 query에 route + company_filter 부여."""
-    search_plan: List[SearchPlanItem] = []
+    search_plan = []
     for query in state.get("query_set", []):
         route, company_filter = _classify_query(query)
         search_plan.append({"query": query, "route": route, "company_filter": company_filter})
@@ -217,8 +194,7 @@ def vectordb_retrieval_node(state: ResearchGraphState) -> Dict:
                 }
             )
 
-    # operator.add reducer: 이번 노드에서 **추가분만** 반환 (전체 누적은 그래프가 처리)
-    return {"raw_documents": docs}
+    return {"raw_documents": state.get("raw_documents", []) + docs}
 
 
 # ================================================================
@@ -232,7 +208,7 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
 
     docs = []
     for item in target_queries:
-        results = web_search(item["query"], max_results=5)
+        results = web_search(item["query"], max_results=3)
         for r in results:
             docs.append(
                 {
@@ -245,7 +221,7 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
                 }
             )
 
-    return {"raw_documents": docs}
+    return {"raw_documents": state.get("raw_documents", []) + docs}
 
 
 # ================================================================
@@ -253,33 +229,25 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
 # ================================================================
 
 _COMPANY_RESEARCH_PROMPT = """\
-다음 기업에 대해 분석용 핵심 정보를 수집하세요.
+다음 기업에 대해 SWOT 분석용 핵심 정보를 수집하세요.
 
 기업: {company}
 조사 목표: {goal}
 
-제공된 문서들을 바탕으로 아래를 **유효한 JSON 한 덩어리**로만 출력하세요 (코드펜스·설명 문장 금지).
-정보를 과도하게 압축하지 말고, 각 항목마다 2~3문장 분량의 맥락과 구체적 수치·날짜를 보존하십시오.
-
-### `source` 필드 (매우 중요)
-- 각 `items[]` 항목의 `source`에는 **아래 참고 문서 블록에 적힌 실제 출처 URL 전체**를 그대로 넣으십시오.
-- `[출처 URL: ...]` 또는 `[출처: https://...]` 형태로 주어진 문자열에서 **스킴(https)부터 경로·쿼리까지** 복사합니다.
-- **금지:** `"https://..."`, `"예시 URL"`, 도메인만 쓰기, 짧게 줄인 링크, 가짜·추측 URL.
-- 웹 검색 문서면 `url` 필드 값을, 벡터DB 문서면 메타데이터에 있는 원문 파일/URL을 그대로 사용합니다. 해당 사실을 뒷받침한 **한 출처**를 택해 한 URL만 넣어도 됩니다.
-
-JSON 스키마 예시 (값은 반드시 실제 내용·실제 URL로 채움):
+제공된 문서들을 바탕으로 아래를 JSON 형식으로 정리하세요:
 {{
   "name": "{company}",
   "items": [
-    {{"content": "…실제 핵심 사실 서술…", "category": "market", "source": "https://실제-도메인/경로?쿼리=값"}},
-    {{"content": "…", "category": "strengths", "source": "https://다른-전체-URL"}}
+    {{"content": "핵심 사실 1", "category": "strengths"}},
+    {{"content": "핵심 사실 2", "category": "weaknesses"}},
+    ...
   ]
 }}
 
-카테고리(각 항목 하나): strengths / weaknesses / opportunities / threats / market 중 선택.
-항목은 최소 8개 이상.
+카테고리: strengths / weaknesses / opportunities / threats / market
+항목은 최소 8개 이상 포함하세요.
 
-참고 문서 (출처 URL은 각 블록 상단에 명시됨):
+참고 문서:
 {documents}
 """
 
@@ -297,21 +265,9 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
     if not company_docs:
         company_docs = raw_docs[:10]
 
-    def _doc_source_line(doc: Dict) -> str:
-        u = (doc.get("url") or "").strip()
-        if u:
-            return u
-        meta = doc.get("metadata") or {}
-        return (meta.get("source_url") or meta.get("url") or meta.get("source_file") or "unknown").strip()
-
     doc_text = "\n\n---\n\n".join(
-        (
-            f"[출처 URL — 이 문자열 전체를 해당 항목의 source에 복사]\n{_doc_source_line(d)}\n"
-            f"[본문]\n{(d.get('content') or '')[:1200]}"
-        )
-        for d in company_docs[:10]
+        d.get("content", "")[:800] for d in company_docs[:8]
     )
-    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPANY_RESEARCH_PROMPT.format(
         company=company,
@@ -320,7 +276,7 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
     )
 
     response = llm.invoke(prompt)
-    raw = str(response.content).strip()
+    raw = response.content.strip()
 
     try:
         match = re.search(r"\{.*\}", raw, re.DOTALL)
@@ -381,11 +337,10 @@ def comparative_research_node(state: ResearchGraphState) -> Dict:
     doc_text = "\n\n---\n\n".join(
         d.get("content", "")[:600] for d in raw_docs[:10]
     )
-    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPARATIVE_PROMPT.format(documents=doc_text)
     response = llm.invoke(prompt)
-    raw = str(response.content).strip()
+    raw = response.content.strip()
 
     try:
         match = re.search(r"\{.*\}", raw, re.DOTALL)
@@ -435,11 +390,6 @@ def merge_results_node(state: ResearchGraphState) -> Dict:
             "min_distance": round(min(distances), 4) if distances else None,
             "has_vdb": any(d.get("source_type") == "vector_db" for d in docs),
             "has_web": any(d.get("source_type") == "web_search" for d in docs),
-            "web_urls": [
-                d.get("url", "")
-                for d in docs
-                if d.get("source_type") == "web_search" and d.get("url")
-            ],
         }
 
     token_usage = update_token_usage(state)
@@ -455,7 +405,7 @@ def merge_results_node(state: ResearchGraphState) -> Dict:
 # 9. validate_evidence_node
 # ================================================================
 
-_DATE_RE = re.compile(r"(202[56]|'2[56]|202[56]년)")
+_DATE_RE = re.compile(r"(20\d{2}|'2[0-9]|\d{5}년)")
 
 def _rule_filter(documents: List[Dict]):
     """1단계 Rule-based 필터."""
@@ -482,30 +432,6 @@ def validate_evidence_node(state: ResearchGraphState) -> Dict:
         "validated_evidence": validated,
         "rejected_evidence": rejected,
     }
-
-
-# ================================================================
-# 9.5. swot_tagging_node
-# ================================================================
-
-def swot_tagging_node(state: ResearchGraphState) -> Dict:
-    """수집된 정보들에서 SWOT 후보군을 식별하고 태깅 (ID 생성)."""
-    company_a = state.get("company_a", {"items": []})
-    company_b = state.get("company_b", {"items": []})
-    
-    # 카테고리가 market이 아닌 것들을 SWOT 후보로 간주
-    swot_candidates = []
-    
-    for i, item in enumerate(company_a.get("items", [])):
-        if item.get("category") in ("strengths", "weaknesses", "opportunities", "threats"):
-            swot_candidates.append(f"swot_a_{i:03d}")
-            
-    for i, item in enumerate(company_b.get("items", [])):
-        if item.get("category") in ("strengths", "weaknesses", "opportunities", "threats"):
-            swot_candidates.append(f"swot_b_{i:03d}")
-            
-    print(f"[swot_tagging] SWOT 후보 식별: {len(swot_candidates)}개")
-    return {"swot_candidate_ids": swot_candidates}
 
 
 # ================================================================
@@ -576,7 +502,7 @@ _BUILD_PROMPT = """\
 """
 
 
-def _format_company_items(company: Mapping[str, Any]) -> str:
+def _format_company_items(company: Dict) -> str:
     items = company.get("items", [])
     if not items:
         return "  (데이터 없음)"
@@ -586,11 +512,11 @@ def _format_company_items(company: Mapping[str, Any]) -> str:
     )
 
 
-def _format_comparison_items(raw_findings: Sequence[Mapping[str, Any]]) -> str:
+def _format_comparison_items(raw_findings: List[Dict]) -> str:
     for finding in raw_findings:
         if finding.get("agent_name") == "comparative_research":
             try:
-                data = json.loads(str(finding.get("raw_content", "{}")))
+                data = json.loads(finding.get("raw_content", "{}"))
                 items = data.get("comparison_items", [])
                 if items:
                     return "\n".join(
@@ -606,8 +532,8 @@ def build_output_node(state: ResearchGraphState) -> Dict:
     """실제 리서치 결과 기반 요약 생성 + findings.json 저장."""
     llm = _get_llm()
     validated = state.get("validated_evidence", [])
-    company_a = state.get("company_a", cast(CompanyRaw, {"name": "LGES", "items": []}))
-    company_b = state.get("company_b", cast(CompanyRaw, {"name": "CATL", "items": []}))
+    company_a = state.get("company_a", {"name": "LGES", "items": []})
+    company_b = state.get("company_b", {"name": "CATL", "items": []})
     raw_findings = state.get("raw_findings", [])
 
     prompt = _BUILD_PROMPT.format(
@@ -621,7 +547,7 @@ def build_output_node(state: ResearchGraphState) -> Dict:
 
     try:
         response = llm.invoke(prompt)
-        raw = str(response.content).strip()
+        raw = response.content.strip()
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         result = json.loads(match.group(0)) if match else {}
     except Exception:
@@ -631,13 +557,6 @@ def build_output_node(state: ResearchGraphState) -> Dict:
 
     # findings.json 저장
     findings_path = RAW_DATA_DIR / "findings.json"
-    all_web_sources = [
-        {"query": q, "url": url}
-        for q, info in state.get("query_coverage", {}).items()
-        for url in info.get("web_urls", [])
-        if url
-    ]
-
     findings_data = {
         "summary": result.get("summary", ""),
         "key_findings": result.get("key_findings", []),
@@ -648,7 +567,6 @@ def build_output_node(state: ResearchGraphState) -> Dict:
         "token_usage": state.get("token_usage", {}),
         "warnings": state.get("warnings", []),
         "raw_findings": raw_findings,
-        "web_sources": all_web_sources,
     }
 
     try:
@@ -688,23 +606,7 @@ def _coverage_symbol(info: Dict) -> str:
 
 
 def human_review_node(state: ResearchGraphState) -> Dict:
-    """Human review interrupt — 실제 리서치 내용 표시 후 승인 요청.
-
-    자동 파이프라인(`python -m src.run`)에서는 기본적으로 interrupt를 건너뜀.
-    대화형 검토를 쓰려면 환경변수 ``SKIP_RESEARCH_HUMAN_REVIEW=0`` 설정.
-    """
-    skip = os.environ.get("SKIP_RESEARCH_HUMAN_REVIEW", "1").strip().lower() not in (
-        "0",
-        "false",
-        "no",
-    )
-    if skip:
-        print(
-            "[human_review] 자동 모드: interrupt 생략 → deliver (대화형: SKIP_RESEARCH_HUMAN_REVIEW=0)",
-            flush=True,
-        )
-        return {}
-
+    """Human review interrupt — 실제 리서치 내용 표시 후 승인 요청."""
     company_a = state.get("company_a", {"name": "LGES", "items": []})
     company_b = state.get("company_b", {"name": "CATL", "items": []})
     raw_findings = state.get("raw_findings", [])
@@ -743,9 +645,6 @@ def human_review_node(state: ResearchGraphState) -> Dict:
             src_str = f"[{'+'.join(sources)}]" if sources else "[없음]"
             gap_marker = "  ← 갭" if sym == "✗" else ""
             lines.append(f"  {sym} {query:<40} {avg_str}  {count}건  {src_str}{gap_marker}")
-            for url in info.get("web_urls", []):
-                if url:
-                    lines.append(f"       └ {url}")
             if sym == "✗":
                 gap_queries.append(query)
     else:

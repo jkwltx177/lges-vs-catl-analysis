@@ -54,7 +54,7 @@ def _extract_swot_by_category(
 def _normalize_swot_item(item: Dict[str, Any]) -> SwotItem:
     """Normalize raw SWOT item to standard format."""
     return SwotItem(
-        point=item.get("point", ""),
+        point=item.get("content", item.get("point", "")),
         evidence=item.get("evidence", ""),
         source=item.get("source", "unknown")
     )

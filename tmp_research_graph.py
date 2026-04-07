@@ -25,7 +25,6 @@ from src.nodes.research_nodes import (
     merge_results_node,
     query_generation_node,
     strategy_routing_node,
-    swot_tagging_node,
     validate_evidence_node,
     vectordb_retrieval_node,
     web_retrieval_node,
@@ -48,7 +47,6 @@ builder.add_node("company_research", company_research_node)
 builder.add_node("comparative_research", comparative_research_node)
 builder.add_node("merge_results", merge_results_node)
 builder.add_node("validate_evidence", validate_evidence_node)
-builder.add_node("swot_tagging", swot_tagging_node)
 builder.add_node("coverage_check", coverage_check_node)
 builder.add_node("build_output", build_output_node)
 builder.add_node("human_review", human_review_node)
@@ -73,8 +71,7 @@ builder.add_edge("web_retrieval", "company_research")
 builder.add_edge("company_research", "comparative_research")
 builder.add_edge("comparative_research", "merge_results")
 builder.add_edge("merge_results", "validate_evidence")
-builder.add_edge("validate_evidence", "swot_tagging")
-builder.add_edge("swot_tagging", "coverage_check")
+builder.add_edge("validate_evidence", "coverage_check")
 
 
 # ----------------------------------------------------------------

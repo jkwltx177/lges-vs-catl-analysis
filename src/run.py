@@ -18,6 +18,7 @@ import argparse
 import os
 import sys
 import traceback
+from typing import Any, Dict, cast
 
 # 프로젝트 루트를 모듈 경로에 (IDE/일부 환경에서 `python -m src.run` 보조)
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -30,11 +31,12 @@ from src.agents.full_pipeline_graph import (  # noqa: E402
     run_full_pipeline_with_report,
     run_research_refine_analysis,
 )
+from src.state.state import ResearchGraphState
 
-INITIAL_STATE = {
+INITIAL_STATE: Dict[str, Any] = {
     "goal": "전기차 캐즘 시기 LGES와 CATL의 회복탄력성 및 SWOT 비교 분석",
     "target_companies": ["LGES", "CATL"],
-    "report_topic": "2024 배터리 시장 전략 보고서",
+    "report_topic": "2026 배터리 시장 전략 보고서",
     "max_retry": 2,
 }
 
@@ -72,7 +74,7 @@ def main() -> int:
     try:
         if args.report:
             final_state = run_full_pipeline_with_report(
-                INITIAL_STATE, thread_prefix="run", verbose=args.verbose
+                cast(ResearchGraphState, INITIAL_STATE), thread_prefix="run", verbose=args.verbose
             )
             print("\n" + "=" * 60)
             print("[run] 최종 Report 결과")
@@ -98,7 +100,7 @@ def main() -> int:
             return 0
 
         final_state = run_research_refine_analysis(
-            INITIAL_STATE, thread_prefix="run", verbose=args.verbose
+            cast(ResearchGraphState, INITIAL_STATE), thread_prefix="run", verbose=args.verbose
         )
 
         print("\n" + "=" * 60)
@@ -114,6 +116,10 @@ def main() -> int:
         print("\n[run] 오류 발생:", repr(e), file=sys.stderr)
         traceback.print_exc()
         return 1
+
+    # import json
+    # print("\n[comparative_swot 결과]")
+    # print(json.dumps(final_state.get("comparative_swot", {}), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

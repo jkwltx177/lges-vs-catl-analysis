@@ -2,24 +2,24 @@
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Any, Dict, cast
 
 from ..state.state import AnalysisGraphState, DataRefineGraphState, ReportGraphState, ResearchGraphState
 
 
 def bridge_node_1(state: ResearchGraphState) -> DataRefineGraphState:
     """Research -> Refine explicit field copy."""
-    return {
+    return cast(DataRefineGraphState, {
         "company_a": state.get("company_a", {}),
         "company_b": state.get("company_b", {}),
         "raw_findings": state.get("raw_findings", []),
         "query_coverage": state.get("query_coverage", {}),
-    }
+    })
 
 
 def bridge_node_2(state: DataRefineGraphState) -> AnalysisGraphState:
     """Refine -> Analysis explicit field copy."""
-    return {
+    return cast(AnalysisGraphState, {
         "market_context": state.get("market_context", {}),
         "company_a_portfolio": state.get("company_a_portfolio", {}),
         "company_b_portfolio": state.get("company_b_portfolio", {}),
@@ -31,12 +31,12 @@ def bridge_node_2(state: DataRefineGraphState) -> AnalysisGraphState:
         "company_b_swot": state.get("company_b_swot", {}),
         "raw_findings": state.get("raw_findings", []),
         "query_coverage": state.get("query_coverage", {}),
-    }
+    })
 
 
 def bridge_node_3(state: AnalysisGraphState) -> ReportGraphState:
     """Analysis -> Report explicit field copy."""
-    return {
+    return cast(ReportGraphState, {
         "market_context": state.get("market_context", {}),
         "comparative_swot": state.get("comparative_swot", {}),
         "final_insight": state.get("final_insight", {}),
@@ -50,4 +50,4 @@ def bridge_node_3(state: AnalysisGraphState) -> ReportGraphState:
         "company_b_swot": state.get("company_b_swot", {}),
         "raw_findings": state.get("raw_findings", []),
         "query_coverage": state.get("query_coverage", {}),
-    }
+    })

@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping, cast
+
+from langchain_core.runnables import RunnableConfig
 
 from ..nodes.bridge_nodes import bridge_node_1, bridge_node_2
+from ..state.state import (
+    AnalysisGraphState,
+    DataRefineGraphState,
+    ReportGraphState,
+    ResearchGraphState,
+)
 
 
-def _warn_missing(stage: str, state: Dict[str, Any], keys: List[str], *, verbose: bool) -> None:
+def _warn_missing(stage: str, state: Mapping[str, Any], keys: List[str], *, verbose: bool) -> None:
     if not verbose:
         return
     missing = [k for k in keys if not state.get(k)]
@@ -19,24 +27,24 @@ def _warn_missing(stage: str, state: Dict[str, Any], keys: List[str], *, verbose
 
 
 def run_research_refine_analysis(
-    initial_state: Dict[str, Any],
+    initial_state: ResearchGraphState,
     thread_prefix: str = "e2e",
     *,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> AnalysisGraphState:
     """Run the three role graphs sequentially with explicit bridge transfers."""
     from .data_refine_graph import graph as refine_graph
     from .research_graph import graph as research_graph
     from ..nodes.graph_analysis import get_compiled_analysis_graph
 
-    research_config = {"configurable": {"thread_id": f"{thread_prefix}_research"}}
-    refine_config = {"configurable": {"thread_id": f"{thread_prefix}_refine"}}
-    analysis_config = {"configurable": {"thread_id": f"{thread_prefix}_analysis"}}
+    research_config: RunnableConfig = {"configurable": {"thread_id": f"{thread_prefix}_research"}}
+    refine_config: RunnableConfig = {"configurable": {"thread_id": f"{thread_prefix}_refine"}}
+    analysis_config: RunnableConfig = {"configurable": {"thread_id": f"{thread_prefix}_analysis"}}
 
     if verbose:
         print("[pipeline] (1/3) Research 그래프 실행 중…", flush=True)
     research_graph.invoke(initial_state, config=research_config)
-    research_state = research_graph.get_state(research_config).values
+    research_state = cast(ResearchGraphState, research_graph.get_state(research_config).values)
     _warn_missing(
         "Research→bridge",
         research_state,
@@ -48,7 +56,7 @@ def run_research_refine_analysis(
     if verbose:
         print("[pipeline] (2/3) Refine(자료 정리) 그래프 실행 중…", flush=True)
     refine_graph.invoke(refine_input, config=refine_config)
-    refine_state = refine_graph.get_state(refine_config).values
+    refine_state = cast(DataRefineGraphState, refine_graph.get_state(refine_config).values)
     _warn_missing(
         "Refine→bridge",
         refine_state,
@@ -67,7 +75,7 @@ def run_research_refine_analysis(
     if verbose:
         print("[pipeline] (3/3) Analysis 그래프 실행 중…", flush=True)
     analysis_graph = get_compiled_analysis_graph()
-    out = analysis_graph.invoke(analysis_input, config=analysis_config)
+    out = cast(AnalysisGraphState, analysis_graph.invoke(analysis_input, config=analysis_config))
     _warn_missing(
         "Analysis→Report",
         out,
@@ -78,11 +86,11 @@ def run_research_refine_analysis(
 
 
 def run_full_pipeline_with_report(
-    initial_state: Dict[str, Any],
+    initial_state: ResearchGraphState,
     thread_prefix: str = "e2e",
     *,
     verbose: bool = False,
-) -> Dict[str, Any]:
+) -> ReportGraphState:
     """Research → Refine → Analysis → Report(섹션·merge·MD/PDF)."""
     from src.core.report_workflow import run_report_from_analysis
 

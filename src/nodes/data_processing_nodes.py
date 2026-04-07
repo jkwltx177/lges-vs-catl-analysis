@@ -3,7 +3,7 @@ Data Processing Nodes for Task 2.
 이 모듈은 조사 단계(Task 1)에서 넘어온 데이터를 정제하고 구조화하는 노드들을 포함합니다.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, cast
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -82,7 +82,7 @@ def clean_node(state: DataRefineGraphState) -> Dict[str, Any]:
         HumanMessage(content=f"다음 조사 결과를 정제하여 LGES와 CATL 각각의 핵심 사실 리스트로 만들어주세요:\n\n{findings_text}")
     ]
     
-    result = structured_llm.invoke(messages)
+    result = cast(PydanticCleanOutput, structured_llm.invoke(messages))
     
     return {
         "company_a_cleaned": [item.model_dump() for item in result.company_a_cleaned],
@@ -109,7 +109,7 @@ def market_node(state: DataRefineGraphState) -> Dict[str, Any]:
         HumanMessage(content=f"다음 데이터를 바탕으로 시장 컨텍스트(MarketContext) 객체를 추출해주세요:\n\n{findings_text}")
     ]
     
-    result = structured_llm.invoke(messages)
+    result = cast(PydanticMarketContext, structured_llm.invoke(messages))
     
     return {"market_context": result.model_dump()}
 
@@ -133,7 +133,7 @@ def portfolio_node(state: DataRefineGraphState) -> Dict[str, Any]:
         HumanMessage(content=f"다음 데이터를 바탕으로 LGES와 CATL 각각의 포트폴리오를 추출해주세요:\n\n{findings_text}")
     ]
     
-    result = structured_llm.invoke(messages)
+    result = cast(PydanticPortfolioOutput, structured_llm.invoke(messages))
     
     return {
         "company_a_portfolio": result.company_a_portfolio.model_dump(),
@@ -161,7 +161,7 @@ def swot_map_node(state: DataRefineGraphState) -> Dict[str, Any]:
         HumanMessage(content=f"다음 팩트들을 분석 없이 순수하게 S, W, O, T 버킷에 분류해주세요. is_fact는 무조건 true로 고정하고, source 필드에는 제공된 팩트의 'source' 정보를 그대로 옮겨 적으세요 (절대 생략 금지):\n\n{findings_text}")
     ]
     
-    result = structured_llm.invoke(messages)
+    result = cast(PydanticSWOTOutput, structured_llm.invoke(messages))
     
     return {
         "company_a_swot": result.company_a_swot.model_dump(),
