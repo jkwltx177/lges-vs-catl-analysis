@@ -59,18 +59,23 @@ class PydanticSWOTOutput(BaseModel):
 
 def clean_node(state: DataRefineGraphState) -> Dict[str, Any]:
     """
-    수집된 날것의 데이터(raw_findings)에서 중복을 제거하고 명확한 문장 형태의 RawItem 리스트로 변환합니다.
+    수집된 날것의 데이터(raw_findings) 및 Task 1에서 생성된 company_a, company_b의 초기 추출 결과에서 
+    중복을 제거하고 명확한 문장 형태의 RawItem 리스트로 변환합니다.
     """
     print("--- [Node] Running clean_node ---")
     raw_findings = state.get("raw_findings", [])
+    company_a_init = state.get("company_a", {}).get("items", [])
+    company_b_init = state.get("company_b", {}).get("items", [])
     
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     structured_llm = llm.with_structured_output(PydanticCleanOutput)
     
     prompt = create_clean_prompt()
     
-    # 원문 데이터 조합
-    findings_text = "\n\n".join([f"Agent: {f.get('agent_name')}\nSubtopic: {f.get('subtopic')}\nSources: {', '.join(f.get('sources', []))}\nContent: {f.get('raw_content')}" for f in raw_findings])
+    # 원문 데이터 및 Task 1 1차 추출 결과 조합
+    findings_text = "=== Task 1 Research Findings ===\n" + "\n\n".join([f"Agent: {f.get('agent_name')}\nSubtopic: {f.get('subtopic')}\nSources: {', '.join(f.get('sources', []))}\nContent: {f.get('raw_content')}" for f in raw_findings])
+    findings_text += f"\n\n=== LGES Task 1 Initial Items ===\n{company_a_init}"
+    findings_text += f"\n\n=== CATL Task 1 Initial Items ===\n{company_b_init}"
     
     messages = [
         SystemMessage(content=prompt),
