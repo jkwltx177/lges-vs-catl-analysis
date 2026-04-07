@@ -3,9 +3,19 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from ..nodes.bridge_nodes import bridge_node_1, bridge_node_2
+
+
+def _warn_missing(stage: str, state: Dict[str, Any], keys: List[str], *, verbose: bool) -> None:
+    if not verbose:
+        return
+    missing = [k for k in keys if not state.get(k)]
+    if missing:
+        print(f"[pipeline] ⚠ {stage}: 비어 있거나 없는 키 — {missing}", flush=True)
+    else:
+        print(f"[pipeline] ✓ {stage}: 필수 키 존재 — {keys}", flush=True)
 
 
 def run_research_refine_analysis(
@@ -27,18 +37,44 @@ def run_research_refine_analysis(
         print("[pipeline] (1/3) Research 그래프 실행 중…", flush=True)
     research_graph.invoke(initial_state, config=research_config)
     research_state = research_graph.get_state(research_config).values
+    _warn_missing(
+        "Research→bridge",
+        research_state,
+        ["company_a", "company_b", "raw_findings"],
+        verbose=verbose,
+    )
     refine_input = bridge_node_1(research_state)
 
     if verbose:
         print("[pipeline] (2/3) Refine(자료 정리) 그래프 실행 중…", flush=True)
     refine_graph.invoke(refine_input, config=refine_config)
     refine_state = refine_graph.get_state(refine_config).values
+    _warn_missing(
+        "Refine→bridge",
+        refine_state,
+        [
+            "market_context",
+            "company_a_portfolio",
+            "company_b_portfolio",
+            "company_a_swot",
+            "company_b_swot",
+            "query_coverage",
+        ],
+        verbose=verbose,
+    )
     analysis_input = bridge_node_2(refine_state)
 
     if verbose:
         print("[pipeline] (3/3) Analysis 그래프 실행 중…", flush=True)
     analysis_graph = get_compiled_analysis_graph()
-    return analysis_graph.invoke(analysis_input, config=analysis_config)
+    out = analysis_graph.invoke(analysis_input, config=analysis_config)
+    _warn_missing(
+        "Analysis→Report",
+        out,
+        ["comparative_swot", "final_insight"],
+        verbose=verbose,
+    )
+    return out
 
 
 def run_full_pipeline_with_report(

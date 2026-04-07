@@ -1,6 +1,7 @@
 """Research Agent 14개 노드 구현."""
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Dict, List
@@ -213,7 +214,8 @@ def vectordb_retrieval_node(state: ResearchGraphState) -> Dict:
                 }
             )
 
-    return {"raw_documents": state.get("raw_documents", []) + docs}
+    # operator.add reducer: 이번 노드에서 **추가분만** 반환 (전체 누적은 그래프가 처리)
+    return {"raw_documents": docs}
 
 
 # ================================================================
@@ -240,7 +242,7 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
                 }
             )
 
-    return {"raw_documents": state.get("raw_documents", []) + docs}
+    return {"raw_documents": docs}
 
 
 # ================================================================
@@ -253,23 +255,28 @@ _COMPANY_RESEARCH_PROMPT = """\
 기업: {company}
 조사 목표: {goal}
 
-제공된 문서들을 바탕으로 아래를 JSON 형식으로 정리하세요.
-이때, 정보를 과도하게 압축하지 말고, 2~3문장 분량의 충분한 맥락과 구체적인 수치/날짜를 반드시 보존하십시오.
-또한, 각 사실이 발췌된 원문의 출처(URL)를 반드시 `source` 필드에 포함시키십시오.
+제공된 문서들을 바탕으로 아래를 **유효한 JSON 한 덩어리**로만 출력하세요 (코드펜스·설명 문장 금지).
+정보를 과도하게 압축하지 말고, 각 항목마다 2~3문장 분량의 맥락과 구체적 수치·날짜를 보존하십시오.
 
+### `source` 필드 (매우 중요)
+- 각 `items[]` 항목의 `source`에는 **아래 참고 문서 블록에 적힌 실제 출처 URL 전체**를 그대로 넣으십시오.
+- `[출처 URL: ...]` 또는 `[출처: https://...]` 형태로 주어진 문자열에서 **스킴(https)부터 경로·쿼리까지** 복사합니다.
+- **금지:** `"https://..."`, `"예시 URL"`, 도메인만 쓰기, 짧게 줄인 링크, 가짜·추측 URL.
+- 웹 검색 문서면 `url` 필드 값을, 벡터DB 문서면 메타데이터에 있는 원문 파일/URL을 그대로 사용합니다. 해당 사실을 뒷받침한 **한 출처**를 택해 한 URL만 넣어도 됩니다.
+
+JSON 스키마 예시 (값은 반드시 실제 내용·실제 URL로 채움):
 {{
   "name": "{company}",
   "items": [
-    {{"content": "핵심 사실 및 구체적 맥락 1", "category": "market", "source": "https://..."}},
-    {{"content": "핵심 사실 및 구체적 맥락 2", "category": "strengths", "source": "https://..."}},
-    ...
+    {{"content": "…실제 핵심 사실 서술…", "category": "market", "source": "https://실제-도메인/경로?쿼리=값"}},
+    {{"content": "…", "category": "strengths", "source": "https://다른-전체-URL"}}
   ]
 }}
 
-카테고리는 다음 중 하나로 임의 지정해도 좋습니다 (이후 정제 노드에서 재조정됩니다): strengths / weaknesses / opportunities / threats / market
-항목은 최소 8개 이상 포함하세요.
+카테고리(각 항목 하나): strengths / weaknesses / opportunities / threats / market 중 선택.
+항목은 최소 8개 이상.
 
-참고 문서:
+참고 문서 (출처 URL은 각 블록 상단에 명시됨):
 {documents}
 """
 
@@ -287,9 +294,19 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
     if not company_docs:
         company_docs = raw_docs[:10]
 
+    def _doc_source_line(doc: Dict) -> str:
+        u = (doc.get("url") or "").strip()
+        if u:
+            return u
+        meta = doc.get("metadata") or {}
+        return (meta.get("source_url") or meta.get("url") or meta.get("source_file") or "unknown").strip()
+
     doc_text = "\n\n---\n\n".join(
-        f"[출처: {d.get('url', d.get('metadata', {}).get('source_file', 'unknown'))}]\n{d.get('content', '')[:800]}" 
-        for d in company_docs[:8]
+        (
+            f"[출처 URL — 이 문자열 전체를 해당 항목의 source에 복사]\n{_doc_source_line(d)}\n"
+            f"[본문]\n{(d.get('content') or '')[:1200]}"
+        )
+        for d in company_docs[:10]
     )
     doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
@@ -631,7 +648,23 @@ def _coverage_symbol(info: Dict) -> str:
 
 
 def human_review_node(state: ResearchGraphState) -> Dict:
-    """Human review interrupt — 실제 리서치 내용 표시 후 승인 요청."""
+    """Human review interrupt — 실제 리서치 내용 표시 후 승인 요청.
+
+    자동 파이프라인(`python -m src.run`)에서는 기본적으로 interrupt를 건너뜀.
+    대화형 검토를 쓰려면 환경변수 ``SKIP_RESEARCH_HUMAN_REVIEW=0`` 설정.
+    """
+    skip = os.environ.get("SKIP_RESEARCH_HUMAN_REVIEW", "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+    )
+    if skip:
+        print(
+            "[human_review] 자동 모드: interrupt 생략 → deliver (대화형: SKIP_RESEARCH_HUMAN_REVIEW=0)",
+            flush=True,
+        )
+        return {}
+
     company_a = state.get("company_a", {"name": "LGES", "items": []})
     company_b = state.get("company_b", {"name": "CATL", "items": []})
     raw_findings = state.get("raw_findings", [])

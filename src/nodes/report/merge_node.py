@@ -21,6 +21,7 @@ from src.report.pdf_export import (
     write_report_artifacts,
 )
 from src.report.pipeline_health import build_pipeline_health_markdown
+from src.report.reference_sources import build_reference_appendix_markdown
 from src.state.state import ReportGraphState
 
 DEFAULT_TITLE_PLAIN = "글로벌 배터리 패러다임 전환기: LGES vs CATL 전략 비교 분석"
@@ -53,7 +54,7 @@ def _title_from_state(state: ReportGraphState) -> str:
     return DEFAULT_TITLE_PLAIN
 
 
-def _conclusion_summary_from_section0(section0: str, *, max_chars: int = 2400) -> str:
+def _conclusion_summary_from_section0(section0: str, *, max_chars: int = 600) -> str:
     t = (section0 or "").strip()
     if not t:
         return "*※ SUMMARY가 비어 있어 결론 요약을 생략합니다.*"
@@ -121,9 +122,21 @@ def build_final_report_markdown(state: ReportGraphState) -> str:
     if not ref_body:
         ref_body = (
             "*※ 참고문헌: 수집된 `raw_findings`의 출처를 section6 노드에서 정리합니다. "
-            "현재 항목이 비어 있으면 조사·정제 파이프라인을 확인하세요.*"
+            "아래 부록에 파이프라인에서 추출한 URL·쿼리 커버리지가 이어집니다.*"
         )
     parts.append(ref_body + "\n\n")
+    parts.append(
+        build_reference_appendix_markdown(
+            state.get("raw_findings") or [],
+            query_coverage=state.get("query_coverage") or {},
+            company_a=state.get("company_a"),
+            company_b=state.get("company_b"),
+            company_a_cleaned=state.get("company_a_cleaned"),
+            company_b_cleaned=state.get("company_b_cleaned"),
+            company_a_swot=state.get("company_a_swot"),
+            company_b_swot=state.get("company_b_swot"),
+        )
+    )
 
     text = "".join(parts)
     if not text.endswith("\n"):

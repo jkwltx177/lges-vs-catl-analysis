@@ -8,6 +8,8 @@
 
 필수: `.env`에 `OPENAI_API_KEY` (Research·Refine·Analysis·Report LLM 호출)
 선택: `TAVILY_API_KEY` 등은 조사 노드(웹 검색)에서 사용 — 없으면 해당 경로에서 오류 날 수 있음
+Task.1 Human Review interrupt: 기본 `SKIP_RESEARCH_HUMAN_REVIEW=1`(자동 통과). 대화형 검토는 `=0`.
+`-v` 로 단계별 필수 State 키 점검 로그 출력.
 """
 
 from __future__ import annotations

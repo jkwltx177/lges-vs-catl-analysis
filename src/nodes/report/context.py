@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, List, Optional
 
+from src.report.reference_sources import collect_all_reference_urls
 from src.state.state import ReportGraphState
 
 
@@ -25,7 +26,7 @@ def build_report_context(
     """
     mode: section1 | section2 | section3 | section4 | section5 | section0 | section6
     - section0: 앞선 sections 1~5 텍스트를 포함 (SUMMARY용)
-    - section6: raw_findings 출처 위주
+    - section6: raw_findings + 기업 조사/정제/SWOT에서 추출한 URL·메타
     """
     parts: List[str] = []
 
@@ -62,7 +63,30 @@ def build_report_context(
             parts.append(f"### {k}\n\n{body[:12000]}\n")
 
     if mode == "section6":
-        parts.append("\n## Raw findings (full sources for REFERENCE)\n")
+        urls = collect_all_reference_urls(
+            state.get("raw_findings") or [],
+            company_a=state.get("company_a"),
+            company_b=state.get("company_b"),
+            company_a_cleaned=state.get("company_a_cleaned"),
+            company_b_cleaned=state.get("company_b_cleaned"),
+            company_a_swot=state.get("company_a_swot"),
+            company_b_swot=state.get("company_b_swot"),
+        )
+        parts.append(
+            "\n## 추출 URL·출처 (파이프라인 자동, 참고문헌에 반드시 반영)\n\n"
+        )
+        if urls:
+            for i, u in enumerate(urls[:250], 1):
+                parts.append(f"{i}. {u}\n")
+        else:
+            parts.append("*(URL이 비어 있으면 아래 findings의 sources 필드를 사용.)*\n")
+
+        qc = state.get("query_coverage") or {}
+        if qc:
+            parts.append("\n## Task.1 조사 쿼리 커버리지 (임베딩·웹 검색과 연결)\n")
+            parts.append(_json(qc, limit=16000))
+
+        parts.append("\n## Raw findings (전체 메타 — 출처 누락 금지)\n")
         raw = state.get("raw_findings") or []
         for i, rf in enumerate(raw):
             if not isinstance(rf, dict):

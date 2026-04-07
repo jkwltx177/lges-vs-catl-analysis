@@ -167,3 +167,19 @@ def swot_map_node(state: DataRefineGraphState) -> Dict[str, Any]:
         "company_a_swot": result.company_a_swot.model_dump(),
         "company_b_swot": result.company_b_swot.model_dump()
     }
+
+
+def refine_join_node(state: DataRefineGraphState) -> Dict[str, Any]:
+    """Task.2 병렬(market / portfolio / swot_map) 완료 후 fan-in. 누락 필드 경고만 기록."""
+    warnings = list(state.get("warnings") or [])
+    if not state.get("market_context"):
+        warnings.append("refine_join: market_context 없음 — market_node 확인")
+    if not state.get("company_a_portfolio") or not state.get("company_b_portfolio"):
+        warnings.append("refine_join: portfolio 없음 — portfolio_node 확인")
+    ca = state.get("company_a_swot") or {}
+    cb = state.get("company_b_swot") or {}
+    if not (ca.get("S") or ca.get("W") or ca.get("O") or ca.get("T")):
+        warnings.append("refine_join: company_a_swot 비어 있음 — swot_map_node 확인")
+    if not (cb.get("S") or cb.get("W") or cb.get("O") or cb.get("T")):
+        warnings.append("refine_join: company_b_swot 비어 있음 — swot_map_node 확인")
+    return {"warnings": warnings}

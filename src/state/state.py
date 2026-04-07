@@ -97,7 +97,7 @@ class ResearchGraphState(TypedDict, total=False):
 
     # Query Generation 출력
     query_set: List[str]
-    search_plan: List[str]
+    search_plan: List[Dict]  # [{"query", "route", "company_filter"}, ...]
 
     # Retrieval 출력 (병렬 노드가 동시에 쓰므로 operator.add로 누적)
     raw_documents: Annotated[List[Dict], operator.add]
@@ -252,7 +252,14 @@ class AnalysisGraphState(TypedDict, total=False):
     company_b_portfolio: CompanyPortfolio
     company_a_swot: CompanySWOT
     company_b_swot: CompanySWOT
+    # Task.1 기업 조사 JSON + Task.2 정제 항목 — 참고문헌 URL 추출용 (보고서 section6·부록)
+    company_a: CompanyRaw
+    company_b: CompanyRaw
+    company_a_cleaned: List[RawItem]
+    company_b_cleaned: List[RawItem]
     raw_findings: Annotated[List[ResearchFinding], operator.add]
+    # Task.1 조사 쿼리 커버리지 (Refine에서 전달 — 보고서 부록용)
+    query_coverage: Dict[str, Dict]
 
     # 병렬 SWOT 분석 에이전트 출력 (교차 기록 금지)
     swot_S: CategoryAnalysisState   # Strength 분석 에이전트 전용
@@ -296,7 +303,14 @@ class ReportGraphState(TypedDict, total=False):
     final_insight: FinalInsight
     company_a_portfolio: CompanyPortfolio
     company_b_portfolio: CompanyPortfolio
+    company_a: CompanyRaw
+    company_b: CompanyRaw
+    company_a_cleaned: List[RawItem]
+    company_b_cleaned: List[RawItem]
+    company_a_swot: CompanySWOT
+    company_b_swot: CompanySWOT
     raw_findings: Annotated[List[ResearchFinding], operator.add]
+    query_coverage: Dict[str, Dict]  # Task.1 → Report 부록
 
     # 보고서 메타 (선택 — 없으면 merge 시점 기본값)
     report_title: str              # 표지 제목 (기본: 프로젝트 정식 제목)

@@ -41,10 +41,12 @@ _SECTION_SPECS: Dict[str, Tuple[str, str, str]] = {
 def _invoke_section(state: ReportGraphState, section_key: str) -> str:
     system, mode, title = _SECTION_SPECS[section_key]
     ctx = build_report_context(state, mode=mode)
-    human = P.human_message_template(title, ctx)
+    human = P.human_message_template(title, ctx, section_key=section_key)
     system = _sanitize_for_chat_api(system, max_chars=50_000)
     human = _sanitize_for_chat_api(human, max_chars=120_000)
-    llm = get_chat_model()
+    # SUMMARY는 중간 분량, 본문·SWOT·참고문헌은 길게
+    max_tokens = 1800 if section_key == "section0" else 8192
+    llm = get_chat_model(max_tokens=max_tokens)
     msg = llm.invoke([SystemMessage(content=system), HumanMessage(content=human)])
     return getattr(msg, "content", str(msg))
 
