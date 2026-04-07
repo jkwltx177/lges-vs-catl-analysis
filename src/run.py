@@ -50,9 +50,12 @@ def main():
         "raw_findings": current_state.get("raw_findings", [])
     }
 
+    import json
     for event in refine_graph.stream(refine_input, config={"configurable": {"thread_id": "refine_001"}}):
         for node_name, output in event.items():
             print(f"\n▶ [Task 2: {node_name}] 완료")
+            # 내용물 확인을 위한 출력 추가
+            print(json.dumps(output, indent=2, ensure_ascii=False))
 
     print("\n" + "=" * 60)
     print("[run] 전체 워크플로우 (Task 1 -> Task 2) 테스트 완료")
