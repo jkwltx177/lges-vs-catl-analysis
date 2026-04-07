@@ -10,8 +10,8 @@
 환경변수:
 
 - ``REPORT_PDF_FONT`` — fpdf2 폴백 시 사용할 .ttf 절대 경로 (선택).
-- ``REPORT_MD_ENCODING`` — 보고서 ``.md`` 파일 인코딩. 기본값 ``cp949`` (한국 Windows 메모장 등과 호환).
-  UTF-8로 저장하려면 ``utf-8`` 또는 ``utf-8-sig`` 로 설정.
+- ``REPORT_MD_ENCODING`` — 보고서 ``.md`` 파일 인코딩. 기본값 ``utf-8``.
+  Windows 메모장 호환이 필요하면 ``cp949`` 또는 ``utf-8-sig`` 로 설정.
 """
 
 from __future__ import annotations
@@ -24,9 +24,9 @@ from typing import Iterator, Optional, Tuple
 
 
 def report_md_encoding() -> str:
-    """보고서 Markdown 파일 입출력에 쓰는 코덱 이름. 기본 ``cp949``."""
-    enc = os.environ.get("REPORT_MD_ENCODING", "cp949").strip()
-    return enc or "cp949"
+    """보고서 Markdown 파일 입출력에 쓰는 코덱 이름. 기본 ``utf-8``."""
+    enc = os.environ.get("REPORT_MD_ENCODING", "utf-8").strip()
+    return enc or "utf-8"
 
 
 def _normalize_korean_text(text: str) -> str:

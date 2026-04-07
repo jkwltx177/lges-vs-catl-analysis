@@ -11,6 +11,8 @@ Constructs and manages the analysis workflow:
 
 from typing import Literal
 
+from langgraph.checkpoint.memory import MemorySaver
+
 from ..state.state import AnalysisGraphState
 
 try:
@@ -292,12 +294,12 @@ def build_analysis_graph_with_virtual_start() -> StateGraph:
 def get_compiled_analysis_graph():
     """
     Build and compile the analysis graph for execution.
-    
+
     Returns:
         Compiled graph (Runnable) ready for sync/async invocation
     """
     graph = build_analysis_graph()
-    return graph.compile()
+    return graph.compile(checkpointer=MemorySaver())
 
 
 if __name__ == "__main__":
