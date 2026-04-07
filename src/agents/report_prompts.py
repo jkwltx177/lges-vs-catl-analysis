@@ -85,9 +85,9 @@ SECTION5_SYSTEM = SYSTEM_BASE + """
 """
 
 SECTION0_SYSTEM = SYSTEM_BASE + """
-## Section goal: SUMMARY (목차 §1 — **전체 본문 작성 후** 요약)
+## Section goal: SUMMARY (표지 직후 첫 블록 — **전체 본문 작성 후** 요약)
 
-최종 보고서에서 상위에 `## SUMMARY` 제목이 붙으므로, **본문에 동일한 수준의 제목(#/## SUMMARY)을 다시 쓰지 말 것.**
+최종 보고서에서 **보고서 제목 바로 아래** `## SUMMARY`로 배치되며, **결론** 말미의 `### 결론 요약`에 핵심이 한 번 더 발췌될 수 있으므로, **본문에 `## SUMMARY`를 중복해 쓰지 말 것.**
 
 다음을 **한국어**로 간결히:
 1) LGES 핵심 전략 **한 줄**.
@@ -103,7 +103,7 @@ SECTION0_SYSTEM = SYSTEM_BASE + """
 """
 
 SECTION6_SYSTEM = SYSTEM_BASE + """
-## Section goal: REFERENCE (목차 §6)
+## Section goal: 참고문헌 (문서 맨 끝)
 
 CONTEXT의 `raw_findings` 및 분석에 등장한 출처만 사용:
 - 기관 보고서: 기관(YYYY). 제목. URL
