@@ -73,7 +73,7 @@ def build_report_context(
             company_b_swot=state.get("company_b_swot"),
         )
         parts.append(
-            "\n## 추출 URL·출처 (파이프라인 자동, 참고문헌에 반드시 반영)\n\n"
+            "\n## 추출 URL·출처 (파이프라인 자동 — REFERENCE에 실제 인용분만 반영)\n\n"
         )
         if urls:
             for i, u in enumerate(urls[:250], 1):

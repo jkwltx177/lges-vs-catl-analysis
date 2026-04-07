@@ -2,7 +2,8 @@
 Task.4 보고서 LangGraph — 실행 순서:
 
   sections_parallel_123 (section1~3 병렬)
-    → section4 → section5 → section0 (SUMMARY) → section6 (REFERENCE) → merge → END
+    → section4 → section5 → section0 (SUMMARY) → section6 (플레이스홀더) → merge → END
+  (REFERENCE 본문은 merge에서 ``data/raw/findings.json``의 ``sources`` 만 삽입)
 
 분석 단계 이후에는 `bridge_from_analysis`로 초기 State를 만든 뒤 `invoke` 한다.
 """

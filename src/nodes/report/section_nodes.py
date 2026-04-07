@@ -31,7 +31,7 @@ _SECTION_SPECS: Dict[str, Tuple[str, str, str]] = {
     "section1": (P.SECTION1_SYSTEM, "section1", "2. 시장 배경 및 산업 환경 변화"),
     "section2": (P.SECTION2_SYSTEM, "section2", "3.1 LG Energy Solution (LGES) 분석"),
     "section3": (P.SECTION3_SYSTEM, "section3", "3.2 CATL 분석"),
-    "section4": (P.SECTION4_SYSTEM, "section4", "4. Comparative SWOT 분석"),
+    "section4": (P.SECTION4_SYSTEM, "section4", "4. comparative swot"),
     "section5": (P.SECTION5_SYSTEM, "section5", "5. 종합 시사점 및 전략적 제언"),
     "section0": (P.SECTION0_SYSTEM, "section0", "1. SUMMARY"),
     "section6": (P.SECTION6_SYSTEM, "section6", "6. REFERENCE"),
@@ -89,4 +89,5 @@ def section0_node(state: ReportGraphState) -> dict:
 
 
 def section6_node(state: ReportGraphState) -> dict:
-    return {"sections": {"section6": _invoke_section(state, "section6")}}
+    """REFERENCE 본문은 merge에서 ``data/raw/findings.json`` 최상위 ``sources`` 만 렌더."""
+    return {"sections": {"section6": ""}}
