@@ -1,0 +1,23 @@
+[project]
+name = "lges-vs-catl-analysis"
+version = "0.1.0"
+description = "LGES vs CATL EV battery strategy analysis (LangGraph pipeline)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain-core>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langgraph>=0.2.0",
+    "markdown>=3.5",
+    "python-dotenv>=1.0.0",
+    "typing-extensions>=4.12.0",
+    "weasyprint>=62.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
