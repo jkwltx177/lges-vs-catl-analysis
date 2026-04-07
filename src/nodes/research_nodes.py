@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path
 from typing import Dict, List
+from datetime import datetime
 
 from langgraph.types import interrupt
 
@@ -48,66 +49,84 @@ def initialize_node(state: ResearchGraphState) -> Dict:
 # 2. query_generation_node
 # ================================================================
 
+
+
+# 1. 프롬프트 개선: 페르소나 주입 및 조사 카테고리 세분화
 _QUERY_PROMPT = """\
-당신은 배터리 산업 전문 조사 에이전트입니다.
-다음 주제에 대해 SWOT 분석(강점/약점/기회/위협)에 필요한 검색 쿼리를 최소 12개 생성하세요.
+당신은 10년 차 배터리 산업 전문 수석 애널리스트입니다. 
+단순한 뉴스 검색을 넘어, 기업의 실질적인 경쟁력과 리스크를 파악할 수 있는 고품질 리서치 쿼리를 생성하세요.
 
-목표: {goal}
-대상 기업: {companies}
-보고서 주제: {topic}
+[분석 환경]
+- 현재 시점: {current_date}
+- 목표: {goal}
+- 대상 기업: {companies}
+- 보고서 주제: {topic}
 
-요구사항:
-- SWOT 4개 축 각각에 3개 이상의 쿼리 포함
-- 각 기업별 쿼리 포함 (LGES 단독, CATL 단독, 양사 비교)
-- 최신 동향(2025~2026) 관련 쿼리 포함
-- 시장/산업 맥락 쿼리 포함
+[요구사항]
+- **SWOT 균형**: 강점/약점/기회/위협 각 축당 최소 3개씩, 총 12개 이상의 쿼리 생성.
+- **심층 조사**: 단순 근황보다는 '재무 건전성', '특허 및 기술 로드맵', '공급망(LFP/하이니켈)', 'IRA/CRMA 정책 대응' 등 전문 영역을 포함할 것.
+- **최신성**: 반드시 2025년 하반기 실적과 2026년 실시간 동향을 타겟팅할 것.
+- **비교 분석**: 양사의 시장 점유율 역전 가능성이나 기술 격차를 직접 대조하는 쿼리 포함.
 
 JSON 배열 형식으로만 출력하세요:
 ["쿼리1", "쿼리2", ...]
 """
 
+def get_dynamic_fallback_queries(companies: List[str]) -> List[str]:
+    """현재 연도(2026년)를 반영한 동적 Fallback 쿼리 생성"""
+    curr_year = datetime.now().year # 2026
+    c1, c2 = (companies[0], companies[1]) if len(companies) >= 2 else ("LGES", "CATL")
+    
+    return [
+        f"{c1} {curr_year} 1분기 영업이익률 및 재무 건전성 분석",
+        f"{c2} 유럽 LFP 배터리 공장 가동 현황 및 2026 점유율 전망",
+        f"{c1} vs {c2} 차세대 전고체 배터리 특허 및 샘플 공급 현황",
+        f"2026년 미국 IRA 보조금 정책 변화가 {c1} 북미 사업에 미치는 영향",
+        f"{c2}의 헝가리 및 독일 생산 거점 효율성 및 물류 리스크",
+        f"전기차 캐즘 돌파를 위한 {c1}의 ESS 사업 비중 확대 전략",
+        f"{c2} 나트륨 이온 배터리 상용화 수준과 저가형 시장 지배력",
+        f"{c1} 하이니켈 NCMA 배터리 수율 및 주요 고객사 이탈 여부",
+        f"글로벌 완성차 업체(OEM)의 배터리 내재화가 {c1}, {c2}에 미치는 위협",
+        f"2026년 배터리 리사이클링 시장 규모 및 {c1}의 합작법인(JV) 현황",
+        f"{c2} 광산 지분 확보를 통한 원자재 수직 계열화 현황",
+        f"리튬/니켈 가격 변동에 따른 {c1} vs {c2} 원가 경쟁력 비교"
+    ]
 
 def query_generation_node(state: ResearchGraphState) -> Dict:
-    """LLM → SWOT 축별 쿼리 생성 (최소 12개)."""
+    """LLM → 전문가적 관점의 SWOT 쿼리 생성 (최소 12개 보장)."""
     llm = _get_llm()
-    companies = ", ".join(state.get("target_companies", ["LGES", "CATL"]))
+    target_companies = state.get("target_companies", ["LGES", "CATL"])
+    companies_str = ", ".join(target_companies)
+    
+    # 현재 날짜 반영하여 최신성 강조
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
     prompt = _QUERY_PROMPT.format(
-        goal=state.get("goal", ""),
-        companies=companies,
-        topic=state.get("report_topic", ""),
+        current_date=current_date,
+        goal=state.get("goal", "상세 비교 분석"),
+        companies=companies_str,
+        topic=state.get("report_topic", "배터리 산업 분석"),
     )
 
+    # 갭(Missing Topics) 보완 로직 강화
     missing = state.get("missing_topics", [])
     if missing:
-        prompt += f"\n\n특히 다음 누락 주제를 보완하는 쿼리를 추가하세요:\n{missing}"
+        prompt += f"\n\n[중요] 이전 조사에서 다음 내용이 부족했습니다. 이를 보완할 초정밀 쿼리를 추가하세요:\n{missing}"
 
-    response = llm.invoke(prompt)
-    raw = response.content.strip()
-
-    # JSON 파싱
     try:
-        match = re.search(r"\[.*\]", raw, re.DOTALL)
+        response = llm.invoke(prompt)
+        raw = response.content.strip()
+        # JSON 배열 추출 정교화
+        match = re.search(r"\[\s*?\".*?\"\s*?\]", raw, re.DOTALL)
         queries: List[str] = json.loads(match.group(0)) if match else []
-    except Exception:
+    except Exception as e:
+        print(f"[Query Gen Error] 파싱 실패: {e}")
         queries = []
 
-    # 최소 12개 보장 (파싱 실패 시 기본 쿼리)
     if len(queries) < 12:
-        queries += [
-            "LGES 배터리 기술 경쟁력 2025",
-            "CATL 시장점유율 2025",
-            "EV 배터리 시장 전망 2025",
-            "LGES 북미 사업 현황",
-            "CATL 나트륨이온 배터리",
-            "EV 캐즘 배터리 업계 영향",
-            "LGES CATL 비교 분석",
-            "배터리 공급망 IRA 영향",
-            "LGES 약점 재무 현황",
-            "CATL 글로벌 전략",
-            "전기차 배터리 기회 요인",
-            "배터리 위협 경쟁사 분석",
-        ]
-        queries = queries[:12]
+        print(f"[Query Gen] 생성된 쿼리 부족({len(queries)}개). 동적 Fallback 쿼리를 주입합니다.")
+        fallback = get_dynamic_fallback_queries(target_companies)
+        queries = list(set(queries + fallback))[:12]
 
     return {"query_set": queries}
 
@@ -116,8 +135,8 @@ def query_generation_node(state: ResearchGraphState) -> Dict:
 # 3. strategy_routing_node
 # ================================================================
 
-_WEB_KEYWORDS = {"최신", "2026", "2025", "뉴스", "발표", "출시", "최근", "어제", "today", "news"}
-_VDB_KEYWORDS = {"전략", "IR", "사업보고서", "기술", "연구", "특허", "실적", "재무", "annual", "report"}
+_WEB_KEYWORDS = {"최신", "2026", "2025", "뉴스", "발표", "출시", "최근", "어제", "today", "news", "IRA", "CRMA", "policy"}
+_VDB_KEYWORDS = {"전략", "IR", "사업보고서", "기술", "연구", "특허", "실적", "재무", "annual", "report" ,"JV", "yield"}
 _MARKET_KEYWORDS = {"시장", "산업", "동향", "캐즘", "점유율", "tam", "cagr", "전망", "규모", "트렌드", "market", "industry"}
 _LGES_KEYWORDS = {"lges", "lg에너지", "엘지에너지", "lgエネ"}
 _CATL_KEYWORDS = {"catl", "닝더스다이", "寧德時代"}
@@ -405,7 +424,7 @@ def merge_results_node(state: ResearchGraphState) -> Dict:
 # 9. validate_evidence_node
 # ================================================================
 
-_DATE_RE = re.compile(r"(20\d{2}|'2[0-9]|\d{5}년)")
+_DATE_RE = re.compile(r"(202[56]|'2[56]|202[56]년)")
 
 def _rule_filter(documents: List[Dict]):
     """1단계 Rule-based 필터."""
