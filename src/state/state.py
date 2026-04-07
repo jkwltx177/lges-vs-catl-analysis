@@ -22,6 +22,7 @@ from typing import Annotated, Dict, List, Optional, TypedDict
 class RawItem(TypedDict):
     content: str
     category: str  # strengths / weaknesses / opportunities / threats / market
+    source: str    # 원문 출처 (URL 또는 Agent 이름)
 
 
 class SWOTItem(TypedDict):
