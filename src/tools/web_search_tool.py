@@ -19,7 +19,11 @@ def web_search(query: str, max_results: int = 5) -> List[Dict]:
     Returns:
         [{"content": ..., "url": ..., "title": ..., "published_date": ...}, ...]
     """
-    client = _get_client()
+    try:
+        client = _get_client()
+    except EnvironmentError:
+        return []
+
     response = client.search(
         query=query,
         search_depth="advanced",

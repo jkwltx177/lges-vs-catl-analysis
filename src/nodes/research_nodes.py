@@ -248,22 +248,25 @@ def web_retrieval_node(state: ResearchGraphState) -> Dict:
 # ================================================================
 
 _COMPANY_RESEARCH_PROMPT = """\
-다음 기업에 대해 SWOT 분석용 핵심 정보를 수집하세요.
+다음 기업에 대해 분석용 핵심 정보를 수집하세요.
 
 기업: {company}
 조사 목표: {goal}
 
-제공된 문서들을 바탕으로 아래를 JSON 형식으로 정리하세요:
+제공된 문서들을 바탕으로 아래를 JSON 형식으로 정리하세요.
+이때, 정보를 과도하게 압축하지 말고, 2~3문장 분량의 충분한 맥락과 구체적인 수치/날짜를 반드시 보존하십시오.
+또한, 각 사실이 발췌된 원문의 출처(URL)를 반드시 `source` 필드에 포함시키십시오.
+
 {{
   "name": "{company}",
   "items": [
-    {{"content": "핵심 사실 1", "category": "strengths"}},
-    {{"content": "핵심 사실 2", "category": "weaknesses"}},
+    {{"content": "핵심 사실 및 구체적 맥락 1", "category": "market", "source": "https://..."}},
+    {{"content": "핵심 사실 및 구체적 맥락 2", "category": "strengths", "source": "https://..."}},
     ...
   ]
 }}
 
-카테고리: strengths / weaknesses / opportunities / threats / market
+카테고리는 다음 중 하나로 임의 지정해도 좋습니다 (이후 정제 노드에서 재조정됩니다): strengths / weaknesses / opportunities / threats / market
 항목은 최소 8개 이상 포함하세요.
 
 참고 문서:
@@ -285,8 +288,10 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
         company_docs = raw_docs[:10]
 
     doc_text = "\n\n---\n\n".join(
-        d.get("content", "")[:800] for d in company_docs[:8]
+        f"[출처: {d.get('url', d.get('metadata', {}).get('source_file', 'unknown'))}]\n{d.get('content', '')[:800]}" 
+        for d in company_docs[:8]
     )
+    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPANY_RESEARCH_PROMPT.format(
         company=company,
@@ -356,6 +361,7 @@ def comparative_research_node(state: ResearchGraphState) -> Dict:
     doc_text = "\n\n---\n\n".join(
         d.get("content", "")[:600] for d in raw_docs[:10]
     )
+    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPARATIVE_PROMPT.format(documents=doc_text)
     response = llm.invoke(prompt)
