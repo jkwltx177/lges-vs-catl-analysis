@@ -40,7 +40,7 @@ class CompanySWOT(TypedDict):
 
 class CompanyPortfolio(TypedDict):
     core_services: List[str]
-    revenue_contribution: List[str]        # e.g. ["BEV 배터리 62%"]
+    revenue_contribution: Dict[str, str] | List[str]  # Task2 output or normalized mapping
     diversification_type: str              # 수직 / 수평 / 비관련
     diversification_stage: str             # 투자 / 수익화
     core_competency: str
@@ -179,29 +179,66 @@ class DataRefineGraphState(TypedDict, total=False):
 
 
 # ================================================================
+# Analysis Sub-Types
+# ================================================================
+
+class SwotItem(TypedDict):
+    """개별 SWOT 항목 (기본 단위)."""
+    point: str
+    evidence: str
+    source: str
+
+
+class EnrichedSwotItem(TypedDict, total=False):
+    """SWOT 항목 + 전략적 맥락."""
+    point: str
+    evidence: str
+    why_it_matters: str
+    impact: str
+
+
+class ComparativePoint(TypedDict, total=False):
+    """LGES vs CATL 비교 분석 포인트."""
+    dimension: str
+    lges_position: str
+    catl_position: str
+    relative_advantage: str
+
+
+class ResilienceEvaluation(TypedDict, total=False):
+    """EV 캐즘기 회복탄력성 평가."""
+    total_score_lges: float
+    total_score_catl: float
+    winner: str
+    evaluation_summary: str
+    evaluation_factors: List[str]
+
+
+# ================================================================
 # Analysis Sub-States
 # ================================================================
 
 class CategoryAnalysisState(TypedDict, total=False):
-    lges_items: List[Dict]             # LGES 해당 카테고리 분석 항목
-    catl_items: List[Dict]             # CATL 해당 카테고리 분석 항목
-    comparative_points: List[Dict]     # 양사 간 상대적 우위·열위 비교
+    lges_items: List[EnrichedSwotItem]
+    catl_items: List[EnrichedSwotItem]
+    comparative_points: List[ComparativePoint]
     strategic_implications: List[str]  # 카테고리별 전략적 시사점
 
 
 class ComparativeSwotState(TypedDict, total=False):
-    S: Dict
-    W: Dict
-    O: Dict
-    T: Dict
+    lges_matrix: Dict[str, List[EnrichedSwotItem]]
+    catl_matrix: Dict[str, List[EnrichedSwotItem]]
+    comparative_summary: str
+    strategic_positioning: str
     consistency_flags: List[str]
 
 
-class InsightState(TypedDict, total=False):
-    key_differences: List[str]      # 양사 핵심 차이점
-    resilience_evaluation: Dict     # EV 캐즘기 회복탄력성 평가
-    strategic_winner: str           # 전략적 우위 기업 판단
-    final_insights: List[str]       # 최종 전략적 시사점 목록
+class FinalInsight(TypedDict, total=False):
+    key_differences: List[str]
+    resilience_evaluation: ResilienceEvaluation
+    strategic_winner: str
+    final_insights: List[str]
+    validation_notes: Optional[List[str]]
 
 
 # ================================================================
@@ -225,7 +262,11 @@ class AnalysisGraphState(TypedDict, total=False):
 
     # context_integration_node / insight_node 출력
     comparative_swot: ComparativeSwotState
-    final_insight: InsightState
+    final_insight: FinalInsight
+
+    # 내부 라우팅 필드
+    review_status: str
+    consistency_flags: List[str]
 
     # 제어 필드
     retry_count: int
@@ -252,7 +293,7 @@ class ReportGraphState(TypedDict, total=False):
     # bridge_node_3에서 주입 (AnalysisGraphState → ReportGraphState)
     market_context: MarketContext
     comparative_swot: ComparativeSwotState
-    final_insight: InsightState
+    final_insight: FinalInsight
     company_a_portfolio: CompanyPortfolio
     company_b_portfolio: CompanyPortfolio
     raw_findings: Annotated[List[ResearchFinding], operator.add]
