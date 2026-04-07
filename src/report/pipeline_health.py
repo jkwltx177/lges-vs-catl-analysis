@@ -23,7 +23,7 @@ SECTION_LABELS = {
     "section3": "본론 — CATL",
     "section4": "본론 — SWOT",
     "section5": "결론 — 시사점·제언",
-    "section6": "참고문헌",
+    "section6": "REFERENCE",
 }
 
 

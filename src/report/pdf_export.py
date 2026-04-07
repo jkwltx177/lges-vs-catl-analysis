@@ -9,9 +9,11 @@
 
 환경변수:
 
-- ``REPORT_PDF_FONT`` — fpdf2 폴백 시 사용할 .ttf 절대 경로 (선택).
-- ``REPORT_MD_ENCODING`` — 보고서 ``.md`` 파일 인코딩. 기본값 ``cp949`` (한국 Windows 메모장 등과 호환).
-  UTF-8로 저장하려면 ``utf-8`` 또는 ``utf-8-sig`` 로 설정.
+- ``REPORT_PDF_FONT`` — fpdf2 폴백 시 사용할 .ttf 절대 경로 (선택). 미지정 시 Arial Unicode 등 시도.
+- ``REPORT_MD_ENCODING`` — 보고서 ``.md`` 파일 인코딩. 기본값 ``utf-8`` (한글·에디터 호환).
+  레거시 메모장(cp949)만 쓸 때 ``cp949`` 로 설정.
+
+PDF 본문은 WeasyPrint에서 **Arial** 우선(한글은 Arial Unicode 등으로 폴백).
 """
 
 from __future__ import annotations
@@ -24,9 +26,9 @@ from typing import Iterator, Optional, Tuple
 
 
 def report_md_encoding() -> str:
-    """보고서 Markdown 파일 입출력에 쓰는 코덱 이름. 기본 ``cp949``."""
-    enc = os.environ.get("REPORT_MD_ENCODING", "cp949").strip()
-    return enc or "cp949"
+    """보고서 Markdown 파일 입출력에 쓰는 코덱 이름. 기본 ``utf-8``."""
+    enc = os.environ.get("REPORT_MD_ENCODING", "utf-8").strip()
+    return enc or "utf-8"
 
 
 def _normalize_korean_text(text: str) -> str:
@@ -57,26 +59,67 @@ def _weasyprint_html(md_text: str) -> str:
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <style>
     body {{
-      font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Helvetica Neue', sans-serif;
-      font-size: 11pt;
-      line-height: 1.55;
-      margin: 2cm;
+      font-family: Arial, "Arial Unicode MS", "Helvetica Neue", Helvetica, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      color: #222;
+      background: #fff;
+    }}
+    h1 {{
+      font-size: 17pt;
+      font-weight: 700;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 0.35em;
+      margin: 0 0 0.75em 0;
       color: #111;
     }}
-    h1 {{ font-size: 18pt; border-bottom: 2px solid #333; padding-bottom: 0.35em; margin-top: 0; }}
-    h2 {{ font-size: 14pt; margin-top: 1.4em; page-break-after: avoid; }}
-    h3 {{ font-size: 12pt; margin-top: 1em; page-break-after: avoid; }}
-    p {{ margin: 0.35em 0; text-align: left; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }}
-    li {{ line-height: 1.55; text-align: left; }}
-    table {{ border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 9.5pt; table-layout: auto; page-break-inside: auto; }}
+    h2 {{
+      font-size: 13pt;
+      font-weight: 700;
+      margin: 1.35em 0 0.5em 0;
+      page-break-after: avoid;
+      color: #1a1a1a;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 0.2em;
+    }}
+    h3 {{
+      font-size: 11pt;
+      font-weight: 700;
+      margin: 1.1em 0 0.4em 0;
+      page-break-after: avoid;
+      color: #333;
+    }}
+    h4 {{ font-size: 10.5pt; font-weight: 600; margin: 0.9em 0 0.35em 0; color: #444; }}
+    p {{ margin: 0.4em 0; text-align: justify; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }}
+    em, i {{ font-style: italic; }}
+    strong {{ font-weight: 700; }}
+    li {{ line-height: 1.55; text-align: left; margin: 0.2em 0; }}
+    table {{
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 9pt;
+      table-layout: auto;
+      page-break-inside: auto;
+    }}
     thead {{ display: table-header-group; }}
     tr {{ page-break-inside: avoid; }}
-    th, td {{ border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top;
-             word-wrap: break-word; overflow-wrap: anywhere; hyphens: manual; }}
-    th {{ background: #f0f0f0; }}
-    ul, ol {{ margin: 0.5em 0; padding-left: 1.5em; }}
-    hr {{ border: none; border-top: 1px solid #ddd; margin: 1.2em 0; }}
-    @page {{ size: A4; margin: 2cm; }}
+    th, td {{
+      border: 1px solid #bfbfbf;
+      padding: 7px 9px;
+      text-align: left;
+      vertical-align: top;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+      hyphens: manual;
+    }}
+    th {{ background: #f3f3f3; font-weight: 600; }}
+    ul, ol {{ margin: 0.45em 0; padding-left: 1.35em; }}
+    hr {{ border: none; border-top: 1px solid #ddd; margin: 1.25em 0; }}
+    code, pre {{ font-family: Consolas, "Courier New", monospace; font-size: 9pt; }}
+    @page {{ size: A4; margin: 1.8cm 2cm; }}
   </style>
 </head>
 <body>
@@ -127,9 +170,10 @@ def _iter_font_paths() -> Iterator[Path]:
     env = os.environ.get("REPORT_PDF_FONT", "").strip()
     if env:
         yield Path(env)
-    # macOS
+    # macOS — Arial 계열 유니코드(한글) 우선, 순수 Arial.ttf는 한글 미지원이라 후순위
     yield Path("/Library/Fonts/Arial Unicode.ttf")
     yield Path("/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
+    yield Path("/System/Library/Fonts/Supplemental/Arial.ttf")
     # Windows
     yield Path(r"C:\Windows\Fonts\malgun.ttf")
     yield Path(r"C:\Windows\Fonts\arialuni.ttf")
@@ -221,26 +265,26 @@ def markdown_to_pdf(md_text: str, pdf_path: str | Path) -> bool:
 
 
 def _read_report_md_file(md_path: Path) -> str:
-    """``REPORT_MD_ENCODING``(기본 cp949)으로 디코드. UTF-8로 저장된 기존 파일은 자동 폴백."""
+    """주 인코딩으로 디코드 후, 실패 시 utf-8·cp949 순으로 폴백(한글 깨짐 방지)."""
     raw = md_path.read_bytes()
     primary = report_md_encoding()
-    try:
-        return raw.decode(primary)
-    except UnicodeDecodeError:
-        pass
-    for fallback in ("utf-8-sig", "utf-8"):
+    order: list[str] = []
+    for enc in (primary, "utf-8-sig", "utf-8", "cp949"):
+        if enc not in order:
+            order.append(enc)
+    for enc in order:
         try:
-            return raw.decode(fallback)
+            return raw.decode(enc)
         except UnicodeDecodeError:
             continue
-    return raw.decode(primary, errors="replace")
+    return raw.decode("utf-8", errors="replace")
 
 
 def md_to_pdf(md_path: str | Path, pdf_path: str | Path) -> bool:
     """
     Markdown **파일** → PDF (startup-invest-agent ``md_to_pdf`` 와 동일 사용 패턴).
 
-    1. ``md_path`` 를 ``report_md_encoding()``(기본 cp949)로 읽고, 실패 시 UTF-8 폴백
+    1. ``md_path`` 를 ``report_md_encoding()``(기본 utf-8)로 읽고, 실패 시 다른 인코딩 폴백
     2. ``markdown_to_pdf`` 로 ``pdf_path`` 에 저장 (내부는 유니코드 → PDF 엔진)
 
     실패 시 ``False`` → 호출부가 .md 경로만 쓰도록 처리 가능.
@@ -268,7 +312,7 @@ def write_report_artifacts(
     md_path = output_dir / f"{stem}.md"
     pdf_path = output_dir / f"{stem}.pdf"
     enc = report_md_encoding()
-    # cp949에 없는 문자(이모지 등)는 U+FFFD로 대체해 파이프라인이 중단되지 않게 함
+    # utf-8은 한글·이모지 대부분 보존. cp949 등에서만 대체 문자 발생 가능
     md_path.write_text(md_text, encoding=enc, errors="replace")
     pdf_ok = md_to_pdf(md_path, pdf_path)
     return str(md_path.resolve()), str(pdf_path.resolve()) if pdf_ok else "", pdf_ok

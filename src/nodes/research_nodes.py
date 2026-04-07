@@ -17,6 +17,153 @@ from src.tools.web_search_tool import web_search
 
 _llm = None
 
+_URL_RE = re.compile(r"https?://[^\s\]\)\"'<>]+")
+
+
+def _dedupe_urls(urls: List[str]) -> List[str]:
+    seen: set = set()
+    out: List[str] = []
+    for u in urls:
+        u = (u or "").strip()
+        if not u or not u.startswith("http") or u in seen:
+            continue
+        seen.add(u)
+        out.append(u)
+    return out
+
+
+def _dedupe_strings(items: List[str]) -> List[str]:
+    """HTTP는 URL 단위로, 그 외는 문자열 단위로 중복 제거(순서 유지)."""
+    seen_http: set = set()
+    seen_other: set = set()
+    out: List[str] = []
+    for x in items:
+        s = (x or "").strip()
+        if not s:
+            continue
+        if s.startswith(("http://", "https://")):
+            if s in seen_http:
+                continue
+            seen_http.add(s)
+            out.append(s)
+        else:
+            if s in seen_other:
+                continue
+            seen_other.add(s)
+            out.append(s)
+    return out
+
+
+def _urls_from_raw_document(d: Dict) -> List[str]:
+    out: List[str] = []
+    u = (d.get("url") or "").strip()
+    if u.startswith("http"):
+        out.append(u)
+    meta = d.get("metadata") or {}
+    for key in ("source_url", "url"):
+        s = meta.get(key)
+        if s and str(s).startswith("http"):
+            out.append(str(s).strip())
+    return out
+
+
+def _urls_from_documents(raw_docs: List[Dict]) -> List[str]:
+    out: List[str] = []
+    for d in raw_docs:
+        if isinstance(d, dict):
+            out.extend(_urls_from_raw_document(d))
+    return _dedupe_urls(out)
+
+
+def _urls_from_json_text(text: str) -> List[str]:
+    out: List[str] = []
+    for m in _URL_RE.finditer(text or ""):
+        out.append(m.group(0).rstrip(".,;)]}"))
+    return out
+
+
+def _urls_from_company_items(company: Dict) -> List[str]:
+    out: List[str] = []
+    if not isinstance(company, dict):
+        return out
+    for it in company.get("items") or []:
+        if not isinstance(it, dict):
+            continue
+        s = (it.get("source") or "").strip()
+        if s.startswith("http"):
+            out.append(s)
+    return _dedupe_urls(out)
+
+
+def _non_http_sources_from_company(company: Dict) -> List[str]:
+    """파일명·기관명 문자열 등 http가 아닌 출처 표기 보존."""
+    out: List[str] = []
+    if not isinstance(company, dict):
+        return out
+    for it in company.get("items") or []:
+        if not isinstance(it, dict):
+            continue
+        s = (it.get("source") or "").strip()
+        if s and not s.startswith(("http://", "https://")):
+            out.append(s)
+    return _dedupe_strings(out)
+
+
+def _urls_from_query_coverage(qc: Dict) -> List[str]:
+    out: List[str] = []
+    if not isinstance(qc, dict):
+        return out
+    for info in qc.values():
+        if isinstance(info, dict):
+            for u in info.get("web_urls") or []:
+                if u and str(u).startswith("http"):
+                    out.append(str(u).strip())
+    return _dedupe_urls(out)
+
+
+def enrich_raw_findings_for_findings_json(
+    raw_findings: List[Dict],
+    *,
+    company_a: Dict,
+    company_b: Dict,
+    query_coverage: Dict,
+) -> List[Dict]:
+    """findings.json 및 downstream에서 `sources` 를 URL·비URL 출처 문자열로 보강."""
+    global_http = _dedupe_urls(
+        _urls_from_company_items(company_a or {})
+        + _urls_from_company_items(company_b or {})
+        + _urls_from_query_coverage(query_coverage or {})
+    )
+    global_other = _dedupe_strings(
+        _non_http_sources_from_company(company_a or {})
+        + _non_http_sources_from_company(company_b or {})
+    )
+    out: List[Dict] = []
+    for f in raw_findings:
+        if not isinstance(f, dict):
+            out.append(f)
+            continue
+        raw_src = f.get("sources") or []
+        existing_http = [
+            str(x).strip()
+            for x in raw_src
+            if x and str(x).startswith(("http://", "https://"))
+        ]
+        existing_other = [
+            str(x).strip()
+            for x in raw_src
+            if x and not str(x).startswith(("http://", "https://"))
+        ]
+        from_content = _urls_from_json_text(str(f.get("raw_content", "")))
+        merged_http = _dedupe_urls(
+            existing_http + from_content + (global_http if not existing_http else [])
+        )
+        extra_other = global_other if not existing_other else []
+        nf = dict(f)
+        nf["sources"] = _dedupe_strings(merged_http + existing_other + extra_other)[:120]
+        out.append(nf)
+    return out
+
 
 def _get_llm():
     global _llm
@@ -356,17 +503,34 @@ LGES와 CATL의 동일 지표를 직접 비교하는 분석을 수행하세요.
 - 기술 역량 (에너지밀도, 사이클 수명, 원가)
 - 지역별 생산 거점
 
-제공된 문서들을 바탕으로 비교 분석을 수행하고, 아래 JSON 형식으로 정리하세요:
+제공된 문서들을 바탕으로 비교 분석을 수행하고, 아래 JSON 형식으로 정리하세요.
+각 `comparison_items[].source`에는 **가능하면 참고 문서에 제시된 전체 https URL**을 넣고, URL이 없으면 짧은 출처명만 적습니다.
+
 {{
   "comparison_items": [
-    {{"metric": "시장점유율 2025", "lges": "...", "catl": "...", "source": "..."}},
+    {{"metric": "시장점유율 2025", "lges": "...", "catl": "...", "source": "https://..."}},
     ...
   ]
 }}
 
-참고 문서:
+참고 문서 (각 블록에 Document URL / Source 이 있으면 그 주소를 source에 우선 사용):
 {documents}
 """
+
+
+def _format_doc_block_for_comparative(d: Dict) -> str:
+    parts: List[str] = []
+    u = (d.get("url") or "").strip()
+    if u:
+        parts.append(f"[Document URL] {u}")
+    meta = d.get("metadata") or {}
+    sf = meta.get("source_url") or meta.get("url")
+    if sf and str(sf).startswith("http"):
+        parts.append(f"[Source URL] {sf}")
+    elif meta.get("source_file"):
+        parts.append(f"[Source file] {meta.get('source_file')}")
+    parts.append((d.get("content") or "")[:600])
+    return "\n".join(parts)
 
 
 def comparative_research_node(state: ResearchGraphState) -> Dict:
@@ -374,7 +538,7 @@ def comparative_research_node(state: ResearchGraphState) -> Dict:
     llm = _get_llm()
     raw_docs = state.get("raw_documents", [])
     doc_text = "\n\n---\n\n".join(
-        d.get("content", "")[:600] for d in raw_docs[:10]
+        _format_doc_block_for_comparative(d) for d in raw_docs[:10] if isinstance(d, dict)
     )
     doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
@@ -388,16 +552,21 @@ def comparative_research_node(state: ResearchGraphState) -> Dict:
     except Exception:
         comparison = {"comparison_items": []}
 
+    comparison_json = json.dumps(comparison, ensure_ascii=False)
+    doc_urls = _urls_from_documents(raw_docs[:10])
+    content_urls = _urls_from_json_text(comparison_json)
+    merged_sources = _dedupe_urls(doc_urls + content_urls)[:80]
+
     # comparison_items를 raw_findings에 추가
     finding: ResearchFinding = {
         "agent_name": "comparative_research",
         "source_type": "vector_db",
         "subtopic": "양사 비교 지표",
-        "raw_content": json.dumps(comparison, ensure_ascii=False),
+        "raw_content": comparison_json,
         "key_points": [
             item.get("metric", "") for item in comparison.get("comparison_items", [])
         ][:5],
-        "sources": [],
+        "sources": merged_sources,
     }
 
     return {
@@ -600,7 +769,7 @@ def build_output_node(state: ResearchGraphState) -> Dict:
 
     validated_ids = [f"ev_{i:04d}" for i in range(len(validated))]
 
-    # findings.json 저장
+    # findings.json 저장 — raw_findings[].sources 비어 있으면 URL 보강
     findings_path = RAW_DATA_DIR / "findings.json"
     all_web_sources = [
         {"query": q, "url": url}
@@ -608,6 +777,17 @@ def build_output_node(state: ResearchGraphState) -> Dict:
         for url in info.get("web_urls", [])
         if url
     ]
+
+    raw_findings_enriched = enrich_raw_findings_for_findings_json(
+        list(raw_findings),
+        company_a=company_a,
+        company_b=company_b,
+        query_coverage=state.get("query_coverage") or {},
+    )
+    aggregated_sources = _dedupe_strings(
+        [u for rf in raw_findings_enriched for u in (rf.get("sources") or []) if isinstance(rf, dict)]
+        + [ws["url"] for ws in all_web_sources if ws.get("url")]
+    )
 
     findings_data = {
         "summary": result.get("summary", ""),
@@ -618,7 +798,8 @@ def build_output_node(state: ResearchGraphState) -> Dict:
         "company_b": company_b,
         "token_usage": state.get("token_usage", {}),
         "warnings": state.get("warnings", []),
-        "raw_findings": raw_findings,
+        "raw_findings": raw_findings_enriched,
+        "sources": aggregated_sources,
         "web_sources": all_web_sources,
     }
 

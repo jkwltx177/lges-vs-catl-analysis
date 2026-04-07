@@ -2,10 +2,29 @@
 
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 from typing import Any, Dict, List, Set
 
 _URL_RE = re.compile(r"https?://[^\s\]\)\"'<>]+")
+
+
+def load_reference_sources_from_findings_json(path: Path | None = None) -> List[str]:
+    """``data/raw/findings.json`` 최상위 ``sources`` 배열을 JSON 순서 그대로 반환."""
+    from src.core.config import RAW_DATA_DIR
+
+    p = path or (RAW_DATA_DIR / "findings.json")
+    if not p.is_file():
+        return []
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return []
+    raw = data.get("sources")
+    if not isinstance(raw, list):
+        return []
+    return [str(x).strip() for x in raw if x and str(x).strip()]
 
 
 def _dedupe_preserve_order(items: List[str]) -> List[str]:
@@ -122,42 +141,6 @@ def format_query_coverage_lines(query_coverage: Dict[str, Any]) -> List[str]:
     return out
 
 
-def build_reference_appendix_markdown(
-    raw_findings: Any,
-    *,
-    query_coverage: Dict[str, Any] | None = None,
-    company_a: Any = None,
-    company_b: Any = None,
-    company_a_cleaned: Any = None,
-    company_b_cleaned: Any = None,
-    company_a_swot: Any = None,
-    company_b_swot: Any = None,
-) -> str:
-    """merge 단계에서 참고문헌 뒤에 붙이는 자동 부록."""
-    urls = collect_all_reference_urls(
-        raw_findings,
-        company_a=company_a,
-        company_b=company_b,
-        company_a_cleaned=company_a_cleaned,
-        company_b_cleaned=company_b_cleaned,
-        company_a_swot=company_a_swot,
-        company_b_swot=company_b_swot,
-    )
-    parts: List[str] = []
-    parts.append("\n### 출처·URL 인덱스 (파이프라인 자동 추출)\n\n")
-    parts.append(
-        "아래는 Task.1 조사 단계에서 수집·임베딩 검색에 사용된 `raw_findings`에서 추출한 URL·메타입니다. "
-        "위의 서술형 참고문헌과 함께 검증하세요.\n\n"
-    )
-    if urls:
-        for i, u in enumerate(urls, 1):
-            parts.append(f"{i}. {u}\n")
-    else:
-        parts.append("*※ 추출된 URL이 없습니다. 조사 단계 `sources`·웹 검색 결과를 확인하세요.*\n")
-
-    qc = format_query_coverage_lines(query_coverage or {})
-    if qc:
-        parts.append("\n#### 조사 쿼리 커버리지 (Task.1 Retrieval)\n\n")
-        parts.extend(line + "\n" for line in qc)
-
-    return "".join(parts)
+def build_reference_appendix_markdown(*_args: Any, **_kwargs: Any) -> str:
+    """레거시 API 호환용. 최종 보고서 부록은 출력하지 않음."""
+    return ""

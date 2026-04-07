@@ -21,16 +21,16 @@ from src.report.pdf_export import (
     write_report_artifacts,
 )
 from src.report.pipeline_health import build_pipeline_health_markdown
-from src.report.reference_sources import build_reference_appendix_markdown
+from src.report.reference_sources import load_reference_sources_from_findings_json
 from src.state.state import ReportGraphState
 
 DEFAULT_TITLE_PLAIN = "글로벌 배터리 패러다임 전환기: LGES vs CATL 전략 비교 분석"
 
-_SUB_INTRO = "### 시장 배경 및 산업 환경 변화"
-_SUB_LGES = "### LG Energy Solution (LGES)"
-_SUB_CATL = "### CATL"
-_SUB_SWOT = "### Comparative SWOT 분석"
-_SUB_INSIGHT = "### 종합 시사점 및 전략적 제언"
+_SUB_INTRO = "### 2. 시장 배경 및 산업 환경 변화"
+_SUB_LGES = "### 3.1 LG Energy Solution (LGES)"
+_SUB_CATL = "### 3.2 CATL"
+_SUB_SWOT = "### 4. comparative swot"
+_SUB_INSIGHT = "### 5. 종합 시사점 및 전략적 제언"
 _SUB_CONCLUSION_SUMMARY = "### 결론 요약"
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -43,7 +43,7 @@ _TOC_MARKDOWN = """## 목차
 2. 서론 — 시장 배경 및 산업 환경 변화  
 3. 본론 — LGES · CATL · SWOT 비교  
 4. 결론 — 종합 시사점 및 결론 요약  
-5. 참고문헌  
+5. REFERENCE (참고문헌)  
 """
 
 
@@ -54,16 +54,18 @@ def _title_from_state(state: ReportGraphState) -> str:
     return DEFAULT_TITLE_PLAIN
 
 
-def _conclusion_summary_from_section0(section0: str, *, max_chars: int = 600) -> str:
+def _conclusion_summary_from_section0(section0: str) -> str:
     t = (section0 or "").strip()
     if not t:
         return "*※ SUMMARY가 비어 있어 결론 요약을 생략합니다.*"
-    if len(t) <= max_chars:
-        return t
-    return t[:max_chars].rstrip() + "\n\n*(위는 SUMMARY의 앞부분 발췌입니다.)*"
+    return t
 
 
-def build_final_report_markdown(state: ReportGraphState) -> str:
+def build_final_report_markdown(
+    state: ReportGraphState,
+    *,
+    reference_sources: list[str] | None = None,
+) -> str:
     """제목 → SUMMARY(제목 직하) → 작성일 → 목차 → 서론 → 본론 → 결론 → 참고문헌."""
     sections = state.get("sections") or {}
     d = parse_or_today(state.get("report_date"))
@@ -117,26 +119,14 @@ def build_final_report_markdown(state: ReportGraphState) -> str:
     parts.append(_conclusion_summary_from_section0(summary_body) + "\n\n")
 
     parts.append("---\n\n")
-    parts.append("## 참고문헌\n\n")
-    ref_body = (sections.get("section6") or "").strip()
-    if not ref_body:
-        ref_body = (
-            "*※ 참고문헌: 수집된 `raw_findings`의 출처를 section6 노드에서 정리합니다. "
-            "아래 부록에 파이프라인에서 추출한 URL·쿼리 커버리지가 이어집니다.*"
-        )
-    parts.append(ref_body + "\n\n")
-    parts.append(
-        build_reference_appendix_markdown(
-            state.get("raw_findings") or [],
-            query_coverage=state.get("query_coverage") or {},
-            company_a=state.get("company_a"),
-            company_b=state.get("company_b"),
-            company_a_cleaned=state.get("company_a_cleaned"),
-            company_b_cleaned=state.get("company_b_cleaned"),
-            company_a_swot=state.get("company_a_swot"),
-            company_b_swot=state.get("company_b_swot"),
-        )
+    parts.append("## REFERENCE\n\n")
+    ref_list = (
+        list(reference_sources)
+        if reference_sources is not None
+        else load_reference_sources_from_findings_json()
     )
+    ref_lines = [f"- {s}" for s in ref_list if str(s).strip()]
+    parts.append("\n".join(ref_lines) + ("\n" if ref_lines else ""))
 
     text = "".join(parts)
     if not text.endswith("\n"):
@@ -145,7 +135,8 @@ def build_final_report_markdown(state: ReportGraphState) -> str:
 
 
 def merge_node(state: ReportGraphState) -> dict:
-    final_report = build_final_report_markdown(state)
+    ref_sources = load_reference_sources_from_findings_json()
+    final_report = build_final_report_markdown(state, reference_sources=ref_sources)
     stem = default_report_stem()
     md_path, pdf_path, pdf_ok = write_report_artifacts(
         final_report,
@@ -167,8 +158,11 @@ def merge_node(state: ReportGraphState) -> dict:
         except OSError:
             pass
 
+    sec_for_health = dict(state.get("sections") or {})
+    if ref_sources:
+        sec_for_health["section6"] = "\n".join(f"- {s}" for s in ref_sources if str(s).strip())
     health_md = build_pipeline_health_markdown(
-        state,
+        {**state, "sections": sec_for_health},
         md_path=md_path_docs,
         pdf_path=pdf_path_docs if pdf_ok_docs else "",
         pdf_ok=pdf_ok_docs,
@@ -190,10 +184,13 @@ def merge_node(state: ReportGraphState) -> dict:
     sec = state.get("sections") or {}
     for key in ("section0", "section1", "section2", "section3", "section4", "section5", "section6"):
         body = (sec.get(key) or "").strip()
-        if not body:
-            warnings.append(
-                f"보고서 섹션 누락: {key} — 본문이 비어 있습니다. pipeline_health 파일을 확인하세요."
-            )
+        if body:
+            continue
+        if key == "section6" and ref_sources:
+            continue
+        warnings.append(
+            f"보고서 섹션 누락: {key} — 본문이 비어 있습니다. pipeline_health 파일을 확인하세요."
+        )
 
     return {
         "final_report": final_report,
@@ -208,4 +205,4 @@ def merge_node(state: ReportGraphState) -> dict:
 
 def merge_sections_markdown(sections: dict) -> str:
     """테스트용: sections dict만으로 본문 생성 (파일 저장 없음)."""
-    return build_final_report_markdown({"sections": sections})
+    return build_final_report_markdown({"sections": sections}, reference_sources=None)
