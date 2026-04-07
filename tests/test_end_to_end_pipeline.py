@@ -102,6 +102,7 @@ class TestEndToEndPipeline(unittest.TestCase):
                 "company_a_swot",
                 "company_b_swot",
                 "raw_findings",
+                "query_coverage",
             },
         )
 

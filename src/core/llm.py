@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-from functools import lru_cache
 from typing import Any, Mapping, Optional, cast
 
 import src.core.env  # noqa: F401 — 프로젝트 .env 선로드
@@ -79,8 +78,13 @@ def invoke_json(prompt: str, payload: Mapping[str, Any]) -> Optional[dict[str, A
 # ---------------------------------------------------------------------------
 
 
-@lru_cache(maxsize=1)
-def get_chat_model(model: Optional[str] = None, temperature: float = 0.3):
+def get_chat_model(
+    model: Optional[str] = None,
+    temperature: float = 0.3,
+    *,
+    max_tokens: Optional[int] = None,
+):
+    """보고서 섹션 등. ``max_tokens`` 로 SUMMARY 짧게·본문 길게 출력 상한 조절."""
     from langchain_openai import ChatOpenAI
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -88,8 +92,11 @@ def get_chat_model(model: Optional[str] = None, temperature: float = 0.3):
         raise RuntimeError(
             "OPENAI_API_KEY가 없거나 placeholder입니다. 프로젝트 루트 `.env`에 유효한 키를 설정하세요."
         )
-    return ChatOpenAI(
-        model=model or os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        temperature=temperature,
-        api_key=api_key,
-    )
+    kwargs: dict[str, Any] = {
+        "model": model or os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        "temperature": temperature,
+        "api_key": api_key,
+    }
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
+    return ChatOpenAI(**kwargs)

@@ -82,6 +82,9 @@ def build_pipeline_health_markdown(
     rf = state.get("raw_findings") or []
     lines.append(f"- `raw_findings` 문서 수: **{len(rf)}**\n")
 
+    qc = state.get("query_coverage") or {}
+    lines.append(f"- `query_coverage` (Task.1 임베딩·검색) 쿼리 수: **{len(qc) if isinstance(qc, dict) else 0}**\n")
+
     mc = state.get("market_context") or {}
     lines.append(f"- `market_context` 키 수: **{len(mc)}** (비어 있으면 ⚠️)\n")
 

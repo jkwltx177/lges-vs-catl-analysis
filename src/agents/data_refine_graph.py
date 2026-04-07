@@ -17,6 +17,7 @@ from src.nodes.data_processing_nodes import (
     clean_node,
     market_node,
     portfolio_node,
+    refine_join_node,
     swot_map_node,
 )
 from src.state.state import DataRefineGraphState
@@ -32,6 +33,7 @@ builder.add_node("clean_node", clean_node)
 builder.add_node("market_node", market_node)
 builder.add_node("portfolio_node", portfolio_node)
 builder.add_node("swot_map_node", swot_map_node)
+builder.add_node("refine_join", refine_join_node)
 
 # ----------------------------------------------------------------
 # 엣지 연결
@@ -44,9 +46,11 @@ builder.add_edge("clean_node", "market_node")
 builder.add_edge("clean_node", "portfolio_node")
 builder.add_edge("clean_node", "swot_map_node")
 
-builder.add_edge("market_node", END)
-builder.add_edge("portfolio_node", END)
-builder.add_edge("swot_map_node", END)
+# 병렬 완료 후 fan-in → 단일 종료 (Task.2 설계와 동일)
+builder.add_edge("market_node", "refine_join")
+builder.add_edge("portfolio_node", "refine_join")
+builder.add_edge("swot_map_node", "refine_join")
+builder.add_edge("refine_join", END)
 
 # ----------------------------------------------------------------
 # Compile
