@@ -56,7 +56,14 @@ def _mock_raw_findings():
 
 def build_mock_analysis_state():
     """분석 단계가 끝난 것처럼 최소 필드를 채운 AnalysisGraphState."""
-    from src.state.state import AnalysisGraphState, CompanyPortfolio, ComparativeSwotState, InsightState, MarketContext
+    from src.state.state import (
+        AnalysisGraphState,
+        CompanyPortfolio,
+        ComparativeSwotState,
+        FinalInsight,
+        MarketContext,
+        ResilienceEvaluation,
+    )
 
     market: MarketContext = {
         "TAM": "약 XXX GWh (예시)",
@@ -83,16 +90,24 @@ def build_mock_analysis_state():
     }
 
     comp: ComparativeSwotState = {
-        "S": {"lges": "OEM 관계·품질", "catl": "원가·캐파"},
-        "W": {"lges": "비용·지역 의존", "catl": "지정학·브랜드 프리미엄"},
-        "O": {"lges": "IRA 현지화", "catl": "ESS·신흥국"},
-        "T": {"lges": "경쟁·원재료", "catl": "무역·규제"},
+        "comparative_summary": "LGES는 OEM·규제 대응, CATL은 규모·원가 중심(디버그).",
+        "strategic_positioning": "캐즘·IRA 환경에서 현지화 vs 규모 효율.",
         "consistency_flags": [],
+        "lges_matrix": {},
+        "catl_matrix": {},
     }
 
-    insight: InsightState = {
+    resilience: ResilienceEvaluation = {
+        "total_score_lges": 7.0,
+        "total_score_catl": 7.5,
+        "winner": "n/a",
+        "evaluation_summary": "디버그용 회복탄력성 요약",
+        "evaluation_factors": ["규제", "포트폴리오"],
+    }
+
+    insight: FinalInsight = {
         "key_differences": ["공급망·규제 대응 vs 규모·원가"],
-        "resilience_evaluation": {"lges": "중간", "catl": "중상 (예시)"},
+        "resilience_evaluation": resilience,
         "strategic_winner": "(분석 목적상 우열 단정 지양 — 디버그 목 데이터)",
         "final_insights": [
             "캐즘기에는 수익성·현금흐름·포트폴리오 균형이 핵심",

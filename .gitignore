@@ -40,9 +40,7 @@ output/
 *.sqlite
 
 # Data Folders (Keep directory structure but ignore contents)
-data/raw/*
 data/processed/*
-data/vectordb/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/vectordb/.gitkeep
