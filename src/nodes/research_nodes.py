@@ -272,6 +272,7 @@ def _research_single_company(company: str, state: ResearchGraphState) -> Dict:
         f"[출처: {d.get('url', d.get('metadata', {}).get('source_file', 'unknown'))}]\n{d.get('content', '')[:800]}" 
         for d in company_docs[:8]
     )
+    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPANY_RESEARCH_PROMPT.format(
         company=company,
@@ -341,6 +342,7 @@ def comparative_research_node(state: ResearchGraphState) -> Dict:
     doc_text = "\n\n---\n\n".join(
         d.get("content", "")[:600] for d in raw_docs[:10]
     )
+    doc_text = doc_text.replace("\x00", "").replace("\u0000", "")
 
     prompt = _COMPARATIVE_PROMPT.format(documents=doc_text)
     response = llm.invoke(prompt)
